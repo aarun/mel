@@ -20,13 +20,11 @@ from PIL import Image
 
 
 
-#for fn in os.listdir('.') :
-    #if fn.endswith('png') :
-        #print(fn)
+for fn in os.listdir('.') :
+    if fn.endswith('png') :
+        print(fn)
+        f_out=open(fn.replace('.png','.txt'),'w')
 
-        #f_out=open(fn.replace('.png','.txt'),'w')
-fn = 'ISIC_0000000_superpixels.png'
-f_out=open(fn.replace('.png','2.txt'),'w')
 
 image = Image.open(fn)
 assert image.mode == 'RGB'
