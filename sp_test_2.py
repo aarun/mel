@@ -22,46 +22,51 @@ from PIL import Image
 
 for fn in os.listdir('.') :
     if fn.endswith('png') :
-        print(fn)
+        #print(fn)
         f_out=open(fn.replace('.png','.txt'),'w')
 
+        #fn = 'ISIC_0000000_superpixels.png'
+        #f_out=open(fn.replace('.png','2.txt'),'w')
 
-image = Image.open(fn)
-assert image.mode == 'RGB'
-imarr_enc = np.array(image)
-imarr_dec = decodeSuperpixelIndex(imarr_enc)
+        image = Image.open(fn)
+        assert image.mode == 'RGB'
+        imarr_enc = np.array(image)
+        imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
-sp_dict = {}
+        sp_dict = {}
 
-for (i, segVal) in enumerate(np.unique(imarr_dec)) :
-    mask = np.zeros(imarr_dec.shape[:2], dtype='uint8')
-    mask[imarr_dec == segVal] = 255
-    print imarr_dec.shape, mask.shape
+        for (i, segVal) in enumerate(np.unique(imarr_dec)) :
+            mask = np.zeros(imarr_dec.shape[:2], dtype='uint8')
+            mask[imarr_dec == segVal] = 255
+            #print imarr_dec.shape, mask.shape
 
-    # show
-    #cv2.imshow("Mask", mask)
-    #cv2.imshow("Applied", cv2.bitwise_and(image, image, mask=mask))
-    props = regionprops(mask, cache=True )
-    #print " superpixel %d" % (i)
-    #print 'Superpixel: ', i, 'Num regions: ', len(props), props[0].centroid, props[0].area
-    sp_dict[segVal] = [props[0].centroid, props[0].area]
+            # show
+            #cv2.imshow("Mask", mask)
+            #cv2.imshow("Applied", cv2.bitwise_and(image, image, mask=mask))
+            props = regionprops(mask, cache=True )
+            #print " superpixel %d" % (i)
+            #print 'Superpixel: ', i, 'Num regions: ', len(props), props[0].centroid, props[0].area
+            sp_dict[segVal] = [props[0].centroid, props[0].area]
+            if props[0].area != len(mask[imarr_dec == segVal]):
+                print 'NO'
+           
 
-# at this point the sp_dict dictionary - has a list of all the unique superpixel labels
-# and also - how many pixels are in each superpixel
-#total_pix = 0
-#for i in range(len(sp_dict)) :
-#    total_pix += sp_dict[i]
+        # at this point the sp_dict dictionary - has a list of all the unique superpixel labels
+        # and also - how many pixels are in each superpixel
+        #total_pix = 0
+        #for i in range(len(sp_dict)) :
+        #    total_pix += sp_dict[i]
 
-print fn, 'SP: ', imarr_dec.shape, imarr_dec.min(), imarr_dec.max(), imarr_dec.shape[0]*imarr_dec.shape[1]
+        print fn, 'SP: ', imarr_dec.shape, imarr_dec.min(), imarr_dec.max(), imarr_dec.shape[0]*imarr_dec.shape[1]
 
-dict_str = 'Superpixel label, Centroid row, Centroid column, Area' + '\n'
-#f_out.write(str(sp_dict))
+        dict_str = 'Superpixel label, Centroid row, Centroid column, Area' + '\n'
+        #f_out.write(str(sp_dict))
 
-for k in sp_dict:
-    dict_str += str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' + str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1])) + '\n'
+        for k in sp_dict:
+            dict_str += str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' + str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1])) + '\n'
 
-f_out.write(dict_str)
-f_out.close()
+        f_out.write(dict_str)
+        f_out.close()
 
 #print sp_dict
 
