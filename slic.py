@@ -5,9 +5,16 @@ from skimage.util import img_as_float
 from skimage import io
 from collections import defaultdict
 import matplotlib.pyplot as plt
+
+from scipy import misc
+#import scipy.misc.pilutil as smp
+import scipy.ndimage
 import numpy as np
 import argparse
-#import cv2
+from PIL import Image
+import cv2
+import collections
+import csv
  
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -36,18 +43,69 @@ plt.savefig('superpix.png', bbox_inches='tight')
 plt.show()
 
 file = open("supersize.txt", "w")
-counter = 0;
+counter = 0
 
-for (i, segVal) in enumerate(np.unique(segments)):
+dict = collections.Counter()
+dict2 = collections.Counter()
+
+
+#for (i, segVal) in enumerate(np.unique(segments)):
     # construct a mask for the segment
     #print "[x] inspecting segment %d" % (i)
-        file.write(str(i) + " ")
-        mask = np.zeros(image.shape[:2], dtype = "uint8")
-        mask[segments == segVal] = 255
-        file.write(str(len(mask[segments == segVal])) + "\n")
+       # file.write(str(i) + " ")
+       # mask = np.zeros(image.shape[:2], dtype = "uint8")
+       # mask[segments == segVal] = 255
+       # file.write(str(len(mask[segments == segVal])) + "\n")
+
+        
+       # pix = mask
+       # pixs = pix[segments == segVal]
+
+        #img = misc.toimage(pixs)
+        #image2 = Image.fromarray(pixs)
+        #colors = image2.getcolors(maxcolors=256) 
+
+        
+#get size and average color of each superpixel
+
+xr = len(image)
+        #print xr
+yr = len(image[0])
+        #print yr
+
+for i in range(0, xr):
+    for j in range(0, yr): 
+                #print i
+                #print j
+        pixel = image[i, j]
+        lbl = segments[i, j]
+        dict2[lbl] += 1
+        dict[lbl] += pixel
+
+print image[0, 0]
+print image[60, 60]
+print "DONE DONE DONE"
+
+w = csv.writer(open("output.csv", "w"))
+for key, val in dict.items():
+    w.writerow([key, val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]), dict2[key]] )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         # show the masked region
         #cv2.imshow("Mask", mask)
-        #cv2.imshow("Applied", cv2.bitwise_and(image, image, mask = mask))
-#cv2.waitKey(0)
+       # cv2.imshow("Applied", cv2.bitwise_and(image, image, mask = mask))
+        #cv2.waitKey(0)
 
 file.close()
