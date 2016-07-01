@@ -130,9 +130,12 @@ for i in range(0, len(dict5)):
 
 
 w = csv.writer(open("output.csv", "w"))
+t = csv.writer(open("output1.csv", "w"))
 for key, val in dict.items():
-    w.writerow([key, val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]), dict3[key]/dict4[key], dict2[key], maskdict[key]] )
+    w.writerow([ val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key])]) #dict3[key]/dict4[key]])
 
+for key, val in dict.items():
+    t.writerow([maskdict[key]])
 
 
 
