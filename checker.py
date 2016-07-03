@@ -4,11 +4,21 @@ stnd = np.loadtxt("output1.csv", delimiter= ",")
 
 chck = np.loadtxt("output2.csv", delimiter= ",")
 
-val = 0
+falsepos = 0
+falseneg = 0
 
 for i in range(len(stnd)):
-	if (stnd[i] != chck[i]):
-		val += 1
+	if (stnd[i] == 1):
+		if (chck[i] != 0):
+			falseneg += 1 
+	if (stnd[i] == 0):
+		#print "do"
+		if (chck[i] == 0):
+			print "hello"
+			falsepos+= 1
 
-print(val)
+
+
+print(falsepos)
+print(falseneg)
 

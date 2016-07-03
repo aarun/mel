@@ -1,11 +1,12 @@
 # import the necessary packages
+from __future__ import division
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 from skimage import io
 from collections import defaultdict
 import matplotlib.pyplot as plt
-
+import imutils
 from scipy import misc
 #import scipy.misc.pilutil as smp
 import scipy.ndimage
@@ -15,6 +16,8 @@ from PIL import Image
 import cv2
 import collections
 import csv
+from math import hypot
+from math import sqrt
  
 
 def rgb2gray(rgb):
@@ -47,7 +50,7 @@ gray = rgb2gray(image)
 segments = slic(image, n_segments = 1000, sigma = 5, slic_zero = 2)
  
 	# show the output of SLIC
-fig = plt.figure("Superpixels -- %d segments" % (1000))
+fig = plt.figure("Superpixels -- %d segments" % (5000))
 ax = fig.add_subplot(1, 1, 1)
 ax.imshow(mark_boundaries(image, segments))
 #fig.savefig('/Users/18AkhilA/Desktop/superpix.jpg')
@@ -88,9 +91,29 @@ dict3 = collections.Counter()
 dict4 = collections.Counter()
 dict5 = collections.Counter()
 
+north = collections.Counter()
+south = collections.Counter()
+east = collections.Counter()
+west = collections.Counter()
+
+centerinx = collections.Counter()
+centeriny = collections.Counter()
+both = {}
+
+
 xr = len(image)
         #print xr
 yr = len(image[0])
+
+for i in range(0, xr):
+    for j in range(0, yr): 
+        pixel = image[i, j]
+        lbl = segments[i, j]
+        both[lbl] = 0
+
+centerx = xr/2
+centery = yr/2
+
         #print yr
 
 for i in range(0, xr):
@@ -103,6 +126,32 @@ for i in range(0, xr):
         dict2[lbl] += 1
         dict[lbl] += pixel
         dict5[lbl] += maskimage[i,j]
+
+
+        north[lbl] += i
+        south[lbl] += xr - i
+        east[lbl] += yr - j
+        west[lbl] += j
+
+        if (i > xr/2):
+            centerinx[lbl] += i-(xr/2)
+        else:
+            centerinx[lbl] += (xr/2)-i
+
+        if (j > yr/2):
+            centeriny[lbl] += j - (yr/2)
+        else:
+            centeriny[lbl] += (yr/2)-j
+
+            #both[lbl] += hypot(i - (xr/2), j - (yr/2))
+
+        both[lbl] += sqrt( abs(i - (xr/2))**2 + abs(j - (yr/2))**2 )
+
+            #if (lbl == 49):
+              #  print "HELLO"
+              #  print sqrt( abs(i - (xr/2))**2 + abs(j - (yr/2))**2 )
+
+
         if (i > 0 and j > 0 and i < xr-1 and j < yr-1):
             code = 0
             code |= int(gray[i-1,j-1] > gray[i,j]) << 7
@@ -116,14 +165,55 @@ for i in range(0, xr):
             dict3[lbl] += code
             dict4[lbl] += 1
 
+#print centerinx
 
 maskdict = collections.Counter()
+directdict = collections.Counter()
+xandy = collections.Counter()
 
-for i in range(0, len(dict5)):
+for i in range(0, len(north)):
     if (dict5[i] / dict2[i] > 0.5):
         maskdict[i] = 1
+
+    if (north[i] < south[i] and north[i] < east[i] and north[i] < west[i] ):
+        directdict[i] = (north[i]/dict2[i])
+        xandy[i] +=1
+    elif (south[i] < north[i] and south[i] < east[i] and south[i] < west[i] ):
+        directdict[i] = (south[i]/dict2[i])
+        xandy[i] +=1
+    elif (east[i] < north[i] and east[i] < south[i] and east[i] < west[i] ):
+        directdict[i] = (east[i]/dict2[i])
+    else:
+        directdict[i] = (west[i]/dict2[i])
+
+#print directdict
+
+
+val = {}
+
+for i in range(len(directdict)):
+    if (xandy[i] == 1):
+        directdict[i] = directdict[i]/(xr)
+        val[i] = directdict[i]/(xr)
+        #print (directdict[i]/ xr)
+    else:
+        directdict[i] = directdict[i]/(yr)
+        val[i] = directdict[i]/(yr)
+        #print (directdict[i]/ yr)
+
+    centerinx[i]  = centerinx[i]/ (xr/2)
+    centeriny[i] = centeriny[i]/ (yr/2)
+
+#print both
+
+total = sqrt( (xr/2)**2 + (yr/2)**2 )
+
+for key in both:
+    both[key] /= total
         
 
+
+#print val
 
 
 
@@ -132,7 +222,7 @@ for i in range(0, len(dict5)):
 w = csv.writer(open("output.csv", "w"))
 t = csv.writer(open("output1.csv", "w"))
 for key, val in dict.items():
-    w.writerow([ val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key])]) #dict3[key]/dict4[key]])
+    w.writerow([val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]),both[key]/(dict2[key]), dict3[key]/dict4[key]]) #/(dict2[key]),   centeriny[key]/dict2[key]]) #, centerinx[key]/dict2[key], directdict[key]])  ,dict3[key]/dict4[key]])
 
 for key, val in dict.items():
     t.writerow([maskdict[key]])
