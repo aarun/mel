@@ -18,10 +18,14 @@ import collections
 import csv
 from math import hypot
 from math import sqrt
+import os
  
 
 def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
+
+#direct1 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data'
+#direct2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
 
 
 # construct the argument parser and parse the arguments
@@ -35,8 +39,8 @@ args2 = vars(ap.parse_args())
 image = img_as_float(io.imread(args["image"]))
 maskimage = img_as_float(io.imread(args2["mask"]))
 
-#greyimage = Image.open(args["image"]).convert('LA')
-#agreyimage = np.asarray(greyimage)
+greyimage = Image.open(args["image"]).convert('LA')
+agreyimage = np.asarray(greyimage)
 
 
 gray = rgb2gray(image)    
@@ -47,7 +51,7 @@ gray = rgb2gray(image)
 #for i in range of segements.shape of zero
 	# apply SLIC and extract (approximately) the supplied number
 	# of segments
-segments = slic(image, n_segments = 1000, sigma = 5, slic_zero = 2)
+segments = slic(image, n_segments = 3000, sigma = 5, slic_zero = 2)
  
 	# show the output of SLIC
 fig = plt.figure("Superpixels -- %d segments" % (5000))
@@ -58,7 +62,7 @@ plt.axis("off")
  
 # show the plots
 plt.savefig('superpix.png', bbox_inches='tight')
-plt.show()
+#plt.show()
 
 file = open("supersize.txt", "w")
 counter = 0
@@ -105,11 +109,11 @@ xr = len(image)
         #print xr
 yr = len(image[0])
 
-for i in range(0, xr):
-    for j in range(0, yr): 
-        pixel = image[i, j]
-        lbl = segments[i, j]
-        both[lbl] = 0
+#for i in range(0, xr):
+ #   for j in range(0, yr): 
+  #      pixel = image[i, j]
+   #     lbl = segments[i, j]
+        
 
 centerx = xr/2
 centery = yr/2
@@ -120,8 +124,10 @@ for i in range(0, xr):
     for j in range(0, yr): 
                 #print i
                 #print j
+        
         pixel = image[i, j]
         lbl = segments[i, j]
+        both[lbl] = 0
 
         dict2[lbl] += 1
         dict[lbl] += pixel
@@ -189,20 +195,20 @@ for i in range(0, len(north)):
 #print directdict
 
 
-val = {}
+#val = {}
 
-for i in range(len(directdict)):
-    if (xandy[i] == 1):
-        directdict[i] = directdict[i]/(xr)
-        val[i] = directdict[i]/(xr)
-        #print (directdict[i]/ xr)
-    else:
-        directdict[i] = directdict[i]/(yr)
-        val[i] = directdict[i]/(yr)
+#for i in range(len(directdict)):
+ #   if (xandy[i] == 1):
+  #      directdict[i] = directdict[i]/(xr)
+   #     val[i] = directdict[i]/(xr)
+    #    #print (directdict[i]/ xr)
+   # else:
+    #    directdict[i] = directdict[i]/(yr)
+     #   val[i] = directdict[i]/(yr)
         #print (directdict[i]/ yr)
 
-    centerinx[i]  = centerinx[i]/ (xr/2)
-    centeriny[i] = centeriny[i]/ (yr/2)
+    #centerinx[i]  = centerinx[i]/ (xr/2)
+    #centeriny[i] = centeriny[i]/ (yr/2)
 
 #print both
 
@@ -215,14 +221,19 @@ for key in both:
 
 #print val
 
+#dict = color
+#dict2 = size
+
+#dict3 = LBP value
+#dict4 = size of lBP
+#both = average distance to center of each superpixel
 
 
 
-
-w = csv.writer(open("output.csv", "w"))
-t = csv.writer(open("output1.csv", "w"))
+w = csv.writer(open("output5.csv", "w"))
+t = csv.writer(open("output6.csv", "w"))
 for key, val in dict.items():
-    w.writerow([val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]),both[key]/(dict2[key]), dict3[key]/dict4[key]]) #/(dict2[key]),   centeriny[key]/dict2[key]]) #, centerinx[key]/dict2[key], directdict[key]])  ,dict3[key]/dict4[key]])
+    w.writerow([val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]),both[key]/(dict2[key])]) #dict3[key]/dict4[key]]) #/(dict2[key]),   centeriny[key]/dict2[key]]) #, centerinx[key]/dict2[key], directdict[key]])  ,dict3[key]/dict4[key]])
 
 for key, val in dict.items():
     t.writerow([maskdict[key]])
