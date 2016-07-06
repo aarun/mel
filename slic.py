@@ -89,32 +89,28 @@ counter = 0
 
 #get size and average color of each superpixel
 
-dict = collections.Counter()
-dict2 = collections.Counter()
-dict3 = collections.Counter()
-dict4 = collections.Counter()
-dict5 = collections.Counter()
+dict = collections.Counter() # color
+dict2 = collections.Counter() # size
+dict3 = collections.Counter() # LBP
+dict4 = collections.Counter() # LBP size
+dict5 = collections.Counter() # ground truth checker
 
+# these dictionaries are for determining which side each superpixel is closest to
 north = collections.Counter()
 south = collections.Counter()
 east = collections.Counter()
 west = collections.Counter()
 
-centerinx = collections.Counter()
-centeriny = collections.Counter()
-both = {}
+centerinx = collections.Counter() # distance to center in x direction
+centeriny = collections.Counter() # distance to center in y direction
+both = {} # distance in both directions
 
 
 xr = len(image)
         #print xr
 yr = len(image[0])
 
-#for i in range(0, xr):
- #   for j in range(0, yr): 
-  #      pixel = image[i, j]
-   #     lbl = segments[i, j]
-        
-
+    
 centerx = xr/2
 centery = yr/2
 
@@ -125,19 +121,24 @@ for i in range(0, xr):
                 #print i
                 #print j
         
+        #initialize dictionary for distance to center
         pixel = image[i, j]
         lbl = segments[i, j]
         both[lbl] = 0
 
-        dict2[lbl] += 1
-        dict[lbl] += pixel
-        dict5[lbl] += maskimage[i,j]
+        dict2[lbl] += 1 # size
+        dict[lbl] += pixel # average color
+        dict5[lbl] += maskimage[i,j] # determine groundtruth 
 
 
+        #distance to closest side
         north[lbl] += i
         south[lbl] += xr - i
         east[lbl] += yr - j
         west[lbl] += j
+
+
+        # distance in x and y to center
 
         if (i > xr/2):
             centerinx[lbl] += i-(xr/2)
@@ -151,12 +152,15 @@ for i in range(0, xr):
 
             #both[lbl] += hypot(i - (xr/2), j - (yr/2))
 
-        both[lbl] += sqrt( abs(i - (xr/2))**2 + abs(j - (yr/2))**2 )
+        both[lbl] += sqrt( abs(i - (xr/2))**2 + abs(j - (yr/2))**2 ) # overall distance to center
 
             #if (lbl == 49):
               #  print "HELLO"
               #  print sqrt( abs(i - (xr/2))**2 + abs(j - (yr/2))**2 )
 
+
+
+        # calculating LBP
 
         if (i > 0 and j > 0 and i < xr-1 and j < yr-1):
             code = 0
@@ -169,12 +173,12 @@ for i in range(0, xr):
             code |= int(gray[i+1,j-1] > gray[i,j]) << 1
             code |= int(gray[i,j-1] > gray[i,j]) << 0
             dict3[lbl] += code
-            dict4[lbl] += 1
+            dict4[lbl] += 1 # LBP size 
 
 #print centerinx
 
-maskdict = collections.Counter()
-directdict = collections.Counter()
+maskdict = collections.Counter() # groundtruth for each superpixel
+directdict = collections.Counter() # 
 xandy = collections.Counter()
 
 for i in range(0, len(north)):
@@ -212,6 +216,7 @@ for i in range(0, len(north)):
 
 #print both
 
+# normalizing average distance to center
 total = sqrt( (xr/2)**2 + (yr/2)**2 )
 
 for key in both:
@@ -228,10 +233,11 @@ for key in both:
 #dict4 = size of lBP
 #both = average distance to center of each superpixel
 
+#output 5 and 6 for test
 
 
-w = csv.writer(open("output5.csv", "w"))
-t = csv.writer(open("output6.csv", "w"))
+w = csv.writer(open("output.csv", "w"))
+t = csv.writer(open("output1.csv", "w"))
 for key, val in dict.items():
     w.writerow([val[0]/(dict2[key]), val[1]/(dict2[key]) , val[2]/(dict2[key]),both[key]/(dict2[key])]) #dict3[key]/dict4[key]]) #/(dict2[key]),   centeriny[key]/dict2[key]]) #, centerinx[key]/dict2[key], directdict[key]])  ,dict3[key]/dict4[key]])
 
@@ -253,9 +259,5 @@ for key, val in dict.items():
 
 
 
-        # show the masked region
-        #cv2.imshow("Mask", mask)
-       # cv2.imshow("Applied", cv2.bitwise_and(image, image, mask = mask))
-        #cv2.waitKey(0)
 
-file.close()
+#file.close()
