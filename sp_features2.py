@@ -37,14 +37,14 @@ counter = 0
 
 for fn in os.listdir('.') :
     if fn.endswith('jpg') :
-    	if counter < 10:
+    	if counter < 20:
 			#maskfn = 'ADD LOCATION'
-			f_out=open(fn.replace('.png','.txt'),'w')
+			f_out=open(fn.replace('.jpg','.txt'),'w')
 
-			image = Image.open(fn)
-			assert image.mode == 'RGB'
-			imarr_enc = np.array(image)
-			imarr_dec = decodeSuperpixelIndex(imarr_enc)
+			#image = Image.open(fn)
+			#assert image.mode == 'RGB'
+			#imarr_enc = np.array(image)
+			#imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
 			original = Image.open(fn)
 			c2 = 0
