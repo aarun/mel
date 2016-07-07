@@ -36,7 +36,7 @@ def rgb2gray(rgb):
 counter = 0
 
 for fn in os.listdir('.') :
-    if fn.endswith('png') :
+    if fn.endswith('jpg') :
     	if counter < 10:
 			#maskfn = 'ADD LOCATION'
 			f_out=open(fn.replace('.png','.txt'),'w')
@@ -46,8 +46,14 @@ for fn in os.listdir('.') :
 			imarr_enc = np.array(image)
 			imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
-			original = Image.open('ISIC_0000000.jpg')
-			mask = Image.open(maskfn)
+			original = Image.open(fn)
+			c2 = 0
+			mask = None
+
+			for fn2 in os.listdir('DIR OF MASKS') :
+				if (counter == c2):
+					mask = Image.open(fn2)
+
 			imarr_mask = np.array(mask)
 			imarr_orig = np.array(original)
 			imarr_bw = rgb2gray(imarr_orig)
