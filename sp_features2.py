@@ -37,103 +37,107 @@ counter = 0
 
 for fn in os.listdir('.') :
     if fn.endswith('jpg') :
-    	if counter < 20:
-			#maskfn = 'ADD LOCATION'
-			f_out=open(fn.replace('.jpg','.txt'),'w')
+		#maskfn = 'ADD LOCATION'
+		f_out=open(fn.replace('.jpg','.txt'),'w')
 
-			#image = Image.open(fn)
-			#assert image.mode == 'RGB'
-			#imarr_enc = np.array(image)
-			#imarr_dec = decodeSuperpixelIndex(imarr_enc)
+		#image = Image.open(fn)
+		#assert image.mode == 'RGB'
+		#imarr_enc = np.array(image)
+		#imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
-			original = Image.open(fn)
-			c2 = 0
-			mask = None
+		original = Image.open(fn)
 
-			for fn2 in os.listdir('DIR OF MASKS') :
-				if (counter == c2):
-					mask = Image.open(fn2)
-				c2 += 1
+		c2 = 0
+		mask = None
 
-			imarr_mask = np.array(mask)
-			imarr_orig = np.array(original)
-			imarr_bw = rgb2gray(imarr_orig)
+		for fn2 in os.listdir('DIR OF MASKS') :
+			if (counter == c2):
+				mask = Image.open(fn2)
+			c2 += 1
 
-			segments = slic(original, n_segments = 3000, sigma = 5, slic_zero = 2)
+		imarr_mask = np.array(mask)
 
+		#mask = Image.open(maskfn)
+		#imarr_mask = np.array(mask)
+		imarr_orig = np.array(original)
+		imarr_bw = rgb2gray(imarr_orig)
 
-			sp_dict = {}
-
-			both = {} # distance in both directions
+		segments = slic(original, n_segments = 3000, sigma = 5, slic_zero = 2)
 
 
-			xr = len(imarr_orig)
-			yr = len(imarr_orig[0])
+		sp_dict = {}
 
-			#gt_dict = collections.Counter()
-			#maskdict[i] = collections.Counter()
-
-			#for i in range(0, xr):
-			   # for j in range(0, yr): 
-			    	#gt_dict += imarr_mask[i, j]
-
-			    
-			centerx = xr/2
-			centery = yr/2
-
-			for (i, segVal) in enumerate(np.unique(segments)) :
-			#for (i, segVal) in enumerate([0,1]):	
-				mask = np.zeros(segments.shape[:2], dtype='uint8')
-				mask[segments == segVal] = 255
-				area = len(mask[segments == segVal])	
-				sp_locations = mask[:,:] == 255
-
-				#if (gt_dict[segVal] / area > 127.5):
-			    #   maskdict[segVal] = 1
-			    #else:
-			   	#	maskdict[segVal] = 0
+		both = {} # distance in both directions
 
 
-				r = (sum(imarr_orig[sp_locations,0]))/area
-				g = (sum(imarr_orig[sp_locations,1]))/area
-				b = (sum(imarr_orig[sp_locations,2]))/area
+		xr = len(imarr_orig)
+		yr = len(imarr_orig[0])
+
+		#gt_dict = collections.Counter()
+		#maskdict[i] = collections.Counter()
+
+		#for i in range(0, xr):
+		   # for j in range(0, yr): 
+		    	#gt_dict += imarr_mask[i, j]
+
+		    
+		centerx = xr/2
+		centery = yr/2
+
+		for (i, segVal) in enumerate(np.unique(segments)) :
+		#for (i, segVal) in enumerate([0,1]):	
+			mask = np.zeros(segments.shape[:2], dtype='uint8')
+			mask[segments == segVal] = 255
+			area = len(mask[segments == segVal])	
+			sp_locations = mask[:,:] == 255
+
+			#if (gt_dict[segVal] / area > 127.5):
+		    #   maskdict[segVal] = 1
+		    #else:
+		   	#	maskdict[segVal] = 0
 
 
-				props = regionprops(mask, cache=True )
-
-				centroid_loc = [0,0]
-				centroid_loc[0] = (int)(props[0].centroid[0])
-				centroid_loc[1] = (int)(props[0].centroid[1])
-				patch = imarr_bw[centroid_loc[0]:centroid_loc[0] + PATCH_SIZE, centroid_loc[1]:centroid_loc[1] + PATCH_SIZE]
-
-				glcm = greycomatrix(patch, [1], [0], 256, symmetric=True, normed=True)
-				dissimilarity = greycoprops(glcm, 'dissimilarity')[0,0]
-				correlation =  greycoprops(glcm, 'correlation')[0,0]
-				contrast = greycoprops(glcm, 'contrast')[0,0]
-				energy = greycoprops(glcm, 'energy')[0,0]
-				homogeneity = greycoprops(glcm, 'homogeneity')[0,0]
-
-				distance = sqrt( abs(props[0].centroid[0] - (xr/2))**2 + abs(props[0].centroid[1] - (yr/2))**2 )
+			r = (sum(imarr_orig[sp_locations,0]))/area
+			g = (sum(imarr_orig[sp_locations,1]))/area
+			b = (sum(imarr_orig[sp_locations,2]))/area
 
 
-				sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance]
-			counter++
-	
+			props = regionprops(mask, cache=True )
 
-dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
-	+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
-	+ ' Contrast, Energy, Homogeneity, Distance from center' + '\n')
+			centroid_loc = [0,0]
+			centroid_loc[0] = (int)(props[0].centroid[0])
+			centroid_loc[1] = (int)(props[0].centroid[1])
+			patch = imarr_bw[centroid_loc[0]:centroid_loc[0] + PATCH_SIZE, centroid_loc[1]:centroid_loc[1] + PATCH_SIZE]
 
-for k in sp_dict:
-    dict_str += (str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' 
-    	+ str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1]))
-    	 + ', ' + str(sp_dict[k][2]) + ', ' + str(sp_dict[k][3])
-    	  + ', ' + str(sp_dict[k][4])+ ', ' + str(sp_dict[k][5]) + ', ' 
-    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
-    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
+			glcm = greycomatrix(patch, [1], [0], 256, symmetric=True, normed=True)
+			dissimilarity = greycoprops(glcm, 'dissimilarity')[0,0]
+			correlation =  greycoprops(glcm, 'correlation')[0,0]
+			contrast = greycoprops(glcm, 'contrast')[0,0]
+			energy = greycoprops(glcm, 'energy')[0,0]
+			homogeneity = greycoprops(glcm, 'homogeneity')[0,0]
 
-f_out.write(dict_str)
-f_out.close()
+			distance = sqrt( abs(props[0].centroid[0] - (xr/2))**2 + abs(props[0].centroid[1] - (yr/2))**2 )
+
+
+			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance]
+		
+
+
+			dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
+				+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
+				+ ' Contrast, Energy, Homogeneity, Distance from center' + '\n')
+
+		for k in sp_dict:
+		    dict_str += (str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' 
+		    	+ str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1]))
+		    	 + ', ' + str(sp_dict[k][2]) + ', ' + str(sp_dict[k][3])
+		    	  + ', ' + str(sp_dict[k][4])+ ', ' + str(sp_dict[k][5]) + ', ' 
+		    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
+		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
+
+		f_out.write(dict_str)
+		f_out.close()
+		counter += 1
 
 #imarr_diss = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
 #imarr_corr = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
