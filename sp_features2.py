@@ -49,10 +49,12 @@ for fn in os.listdir('.') :
 
 		c2 = 0
 		mask = None
+		mask_out = None
 
 		for fn2 in os.listdir('DIR OF MASKS') :
 			if (counter == c2):
 				mask = Image.open(fn2)
+				mask_out = open(fn.replace('.jpg','.txt'),'w')
 			c2 += 1
 
 		imarr_mask = np.array(mask)
@@ -136,6 +138,8 @@ for fn in os.listdir('.') :
 		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
 
 		f_out.write(dict_str)
+		mask_out.write(maskdict)
+		mask_out.close()
 		f_out.close()
 		counter += 1
 
