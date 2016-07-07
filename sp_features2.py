@@ -53,6 +53,7 @@ for fn in os.listdir('.') :
 			for fn2 in os.listdir('DIR OF MASKS') :
 				if (counter == c2):
 					mask = Image.open(fn2)
+				c2 += 1
 
 			imarr_mask = np.array(mask)
 			imarr_orig = np.array(original)
