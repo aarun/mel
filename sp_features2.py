@@ -73,12 +73,12 @@ for fn in os.listdir('.') :
 		xr = len(imarr_orig)
 		yr = len(imarr_orig[0])
 
-		#gt_dict = collections.Counter()
-		#maskdict[i] = collections.Counter()
+		gt_dict = collections.Counter()
+		maskdict[i] = collections.Counter()
 
-		#for i in range(0, xr):
-		   # for j in range(0, yr): 
-		    	#gt_dict += imarr_mask[i, j]
+		for i in range(0, xr):
+		    for j in range(0, yr): 
+		    	gt_dict += imarr_mask[i, j]
 
 		    
 		centerx = xr/2
@@ -86,15 +86,15 @@ for fn in os.listdir('.') :
 
 		for (i, segVal) in enumerate(np.unique(segments)) :
 		#for (i, segVal) in enumerate([0,1]):	
-			mask = np.zeros(segments.shape[:2], dtype='uint8')
-			mask[segments == segVal] = 255
-			area = len(mask[segments == segVal])	
-			sp_locations = mask[:,:] == 255
+			mask2 = np.zeros(segments.shape[:2], dtype='uint8')
+			mask2[segments == segVal] = 255
+			area = len(mask2[segments == segVal])	
+			sp_locations = mask2[:,:] == 255
 
-			#if (gt_dict[segVal] / area > 127.5):
-		    #   maskdict[segVal] = 1
-		    #else:
-		   	#	maskdict[segVal] = 0
+			if (gt_dict[segVal] / area > 127.5):
+		    	maskdict[segVal] = 1
+		    else:
+		    	maskdict[segVal] = 0
 
 
 			r = (sum(imarr_orig[sp_locations,0]))/area
