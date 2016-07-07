@@ -11,7 +11,7 @@ from skimage.io import imread
 from PIL import Image
 from skimage.segmentation import slic
 from math import sqrt
-
+from collections import defaultdict
 
 PATCH_SIZE = 10
 
@@ -40,6 +40,7 @@ def rgb2gray(rgb):
         #f_out=open(fn.replace('.png','.txt'),'w')
 
 fn = 'ISIC_0000000_superpixels.png'
+maskfn = 'ADD LOCATION'
 f_out=open(fn.replace('.png','.txt'),'w')
 
 image = Image.open(fn)
@@ -48,6 +49,8 @@ imarr_enc = np.array(image)
 imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
 original = Image.open('ISIC_0000000.jpg')
+mask = Image.open(maskfn)
+imarr_mask = np.array(mask)
 imarr_orig = np.array(original)
 imarr_bw = rgb2gray(imarr_orig)
 
@@ -62,6 +65,13 @@ both = {} # distance in both directions
 xr = len(imarr_orig)
 yr = len(imarr_orig[0])
 
+gt_dict = collections.Counter()
+maskdict[i] = collections.Counter()
+
+for i in range(0, xr):
+    for j in range(0, yr): 
+    	gt_dict += imarr_mask[i, j]
+
     
 centerx = xr/2
 centery = yr/2
@@ -72,6 +82,11 @@ for (i, segVal) in enumerate(np.unique(segments)) :
 	mask[segments == segVal] = 255
 	area = len(mask[segments == segVal])	
 	sp_locations = mask[:,:] == 255
+
+	if (gt_dict[segVal] / area > 0.5):
+        maskdict[segVal] = 1
+    else:
+    	maskdict[segVal] = 0
 
 
 	r = (sum(imarr_orig[sp_locations,0]))/area
@@ -122,6 +137,7 @@ imarr_homo =  np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
 
 for row in range(imarr_diss.shape[0]) :
 	for col in range(imarr_diss.shape[1]) :
+
 		imarr_diss[row][col] = int((sp_dict[segments[row][col]][5])*(25500/367))
 		corr = int((sp_dict[segments[row][col]][6])*255)
 		if corr < 0:

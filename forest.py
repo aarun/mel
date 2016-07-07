@@ -19,11 +19,11 @@ xr = len(image)
 yr = len(image[0])
 
 
-data = np.loadtxt("output.csv", delimiter= ",")
+data = np.loadtxt("output.csv", delimiter= ",") # feaure file
 l = len(data)
 data.resize(l, 4)
 
-result = np.loadtxt("output1.csv", delimiter= ",")
+result = np.loadtxt("output1.csv", delimiter= ",") # groundtruth file for superpixels
 lr = len(result)
 result.resize(lr,)
 
@@ -35,7 +35,7 @@ est.fit(data, result)
 
 print "Finished planting!"
 
-pred = np.loadtxt("output5.csv", delimiter= ",")
+pred = np.loadtxt("output5.csv", delimiter= ",") # unknown feature
 lp = len(pred)
 pred.resize(lp, 4)
 
