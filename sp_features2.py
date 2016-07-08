@@ -11,6 +11,7 @@ from skimage.io import imread
 from PIL import Image
 from skimage.segmentation import slic
 from math import sqrt
+import collections
 from collections import defaultdict
 
 PATCH_SIZE = 10
@@ -39,7 +40,7 @@ for fn in os.listdir('.') :
     if fn.endswith('jpg') :
 		#maskfn = 'ADD LOCATION'
 		f_out=open(fn.replace('.jpg','.txt'),'w')
-
+		print 'Processing file: ', fn
 		#image = Image.open(fn)
 		#assert image.mode == 'RGB'
 		#imarr_enc = np.array(image)
@@ -51,11 +52,14 @@ for fn in os.listdir('.') :
 		mask = None
 		mask_out = None
 
-		for fn2 in os.listdir('DIR OF MASKS') :
-			if (counter == c2):
-				mask = Image.open(fn2)
-				mask_out = open(fn.replace('.jpg','.txt'),'w')
-			c2 += 1
+		seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
+		for fn2 in os.listdir(seg_gt_dir) :
+			if fn2.endswith('png') :
+				long_fn = seg_gt_dir + "\\" + fn2
+				if (counter == c2):
+					mask = Image.open(long_fn)
+					mask_out = open(long_fn.replace('.png','.txt'),'w')
+				c2 += 1
 
 		imarr_mask = np.array(mask)
 
@@ -76,11 +80,12 @@ for fn in os.listdir('.') :
 		yr = len(imarr_orig[0])
 
 		gt_dict = collections.Counter()
-		maskdict[i] = collections.Counter()
+		maskdict = collections.Counter()
 
 		for i in range(0, xr):
 		    for j in range(0, yr): 
-		    	gt_dict += imarr_mask[i, j]
+		    	lbl = segments[i, j]
+		    	gt_dict[lbl] += imarr_mask[i, j]
 
 		    
 		centerx = xr/2
@@ -93,10 +98,10 @@ for fn in os.listdir('.') :
 			area = len(mask2[segments == segVal])	
 			sp_locations = mask2[:,:] == 255
 
-			if (gt_dict[segVal] / area > 127.5):
-		    	maskdict[segVal] = 1
-		    else:
-		    	maskdict[segVal] = 0
+			if (gt_dict[segVal] / area > 127.5) :
+				maskdict[segVal] = 1
+			else :
+				maskdict[segVal] = 0
 
 
 			r = (sum(imarr_orig[sp_locations,0]))/area
@@ -104,7 +109,7 @@ for fn in os.listdir('.') :
 			b = (sum(imarr_orig[sp_locations,2]))/area
 
 
-			props = regionprops(mask, cache=True )
+			props = regionprops(mask2, cache=True )
 
 			centroid_loc = [0,0]
 			centroid_loc[0] = (int)(props[0].centroid[0])
@@ -137,8 +142,14 @@ for fn in os.listdir('.') :
 		    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
 		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
 
+		maskdict_str = ('label, mask')
+
+		for k in maskdict:
+			maskdict_str += (str(k) + ', ' + str(maskdict[k]) + '\n')
+
+
 		f_out.write(dict_str)
-		mask_out.write(maskdict)
+		mask_out.write(maskdict_str)
 		mask_out.close()
 		f_out.close()
 		counter += 1
