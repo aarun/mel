@@ -48,18 +48,18 @@ for fn in os.listdir('.') :
 
 		original = Image.open(fn)
 
-		c2 = 0
+		
 		mask = None
 		mask_out = None
 
+		fn2 = fn.replace('.jpg', '_Segmentation.png')
+
 		seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
-		for fn2 in os.listdir(seg_gt_dir) :
-			if fn2.endswith('png') :
-				long_fn = seg_gt_dir + "\\" + fn2
-				if (counter == c2):
-					mask = Image.open(long_fn)
-					mask_out = open(long_fn.replace('.png','.txt'),'w')
-				c2 += 1
+		long_fn = seg_gt_dir + "\\" + fn2
+			
+		mask = Image.open(long_fn)
+		mask_out = open(long_fn.replace('.png','.txt'),'w')
+				
 
 		imarr_mask = np.array(mask)
 
@@ -82,11 +82,6 @@ for fn in os.listdir('.') :
 		gt_dict = collections.Counter()
 		maskdict = collections.Counter()
 
-		for i in range(0, xr):
-		    for j in range(0, yr): 
-		    	lbl = segments[i, j]
-		    	gt_dict[lbl] += imarr_mask[i, j]
-
 		    
 		centerx = xr/2
 		centery = yr/2
@@ -97,6 +92,7 @@ for fn in os.listdir('.') :
 			mask2[segments == segVal] = 255
 			area = len(mask2[segments == segVal])	
 			sp_locations = mask2[:,:] == 255
+			gt_dict[segVal] = np.sum(imarr_mask[segments == segVal])
 
 			if (gt_dict[segVal] / area > 127.5) :
 				maskdict[segVal] = 1
