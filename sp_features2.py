@@ -13,6 +13,21 @@ from skimage.segmentation import slic
 from math import sqrt
 import collections
 from collections import defaultdict
+import argparse
+
+ap = argparse.ArgumentParser()
+ap.add_argument('-l', '--list', required = True, help = 'name of batch file')
+args = vars(ap.parse_args())
+
+
+file_list =[]
+
+with open(args['list']) as batch_file :
+	for line in batch_file :
+		a = line.strip('\n')
+		file_list.append(a)
+
+print file_list
 
 PATCH_SIZE = 10
 
@@ -36,7 +51,7 @@ def rgb2gray(rgb):
 
 counter = 0
 
-for fn in os.listdir('.') :
+for fn in file_list:
     if fn.endswith('jpg') :
 		#maskfn = 'ADD LOCATION'
 		f_out=open(fn.replace('.jpg','.txt'),'w')
@@ -54,12 +69,13 @@ for fn in os.listdir('.') :
 
 		fn2 = fn.replace('.jpg', '_Segmentation.png')
 
-		seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
-		long_fn = seg_gt_dir + "\\" + fn2
+		#seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
+		seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
+		long_fn = seg_gt_dir + "/" + fn2
 			
 		mask = Image.open(long_fn)
 		mask_out = open(long_fn.replace('.png','.txt'),'w')
-				
+			
 
 		imarr_mask = np.array(mask)
 
@@ -81,17 +97,21 @@ for fn in os.listdir('.') :
 
 		gt_dict = collections.Counter()
 		maskdict = collections.Counter()
-
 		    
 		centerx = xr/2
 		centery = yr/2
 
+
+
 		for (i, segVal) in enumerate(np.unique(segments)) :
 		#for (i, segVal) in enumerate([0,1]):	
+
 			mask2 = np.zeros(segments.shape[:2], dtype='uint8')
 			mask2[segments == segVal] = 255
 			area = len(mask2[segments == segVal])	
 			sp_locations = mask2[:,:] == 255
+
+
 			gt_dict[segVal] = np.sum(imarr_mask[segments == segVal])
 
 			if (gt_dict[segVal] / area > 127.5) :
@@ -129,6 +149,7 @@ for fn in os.listdir('.') :
 			dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
 				+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
 				+ ' Contrast, Energy, Homogeneity, Distance from center' + '\n')
+
 
 		for k in sp_dict:
 		    dict_str += (str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' 
