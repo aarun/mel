@@ -323,13 +323,19 @@ else :
 			
 
 print 'TRAINING'
-forest = RandomForestRegressor(n_estimators = 500, n_jobs = 1)
+forest = RandomForestRegressor(n_estimators = 500, n_jobs = 6)
 forest.fit(data, groundtruth)
 
 #joblib.dump(forest, 'forest.pkl')
 
-with open('/Users/18AkhilA/Documents/mel/forest.pkl', 'wb') as f:
-    cPickle.dump(forest, f)
+if (_platform == "darwin") : 
+	with open('/Users/18AkhilA/Documents/mel/forest.pkl', 'wb') as f:
+	    cPickle.dump(forest, f)
+else :
+	with open('c:\mel\\forest.pkl', 'wb') as f:
+	    cPickle.dump(forest, f)
+
+
 
 
 
