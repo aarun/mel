@@ -12,7 +12,10 @@ from sklearn.externals import joblib
 import os
 
 
-seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data'
+if (_platform == "darwin") : 
+		seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data'
+	else :
+		seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_Data'
 
 for fn in os.listdir('.') :
 	if (fn.endswith('.csv')) :
