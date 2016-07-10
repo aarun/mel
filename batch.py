@@ -8,7 +8,7 @@ batch_str = ('')
 f_out=open('batch1.txt', 'w')
 
 for fn in os.listdir('.') :
-	if (fn.endswith('jpg')) :
+	if (fn.endswith('.jpg') and fn[0] != '.') :
 		if counter2 < 50 :
 			batch_str += (str(fn) + '\n')
 			counter2 +=1
