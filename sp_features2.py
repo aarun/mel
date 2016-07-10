@@ -14,6 +14,7 @@ from math import sqrt
 import collections
 from collections import defaultdict
 import argparse
+from sys import platform as _platform
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-l', '--list', required = True, help = 'name of batch file')
@@ -69,9 +70,14 @@ for fn in file_list:
 
 		fn2 = fn.replace('.jpg', '_Segmentation.png')
 
-		#seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
-		seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
-		long_fn = seg_gt_dir + "/" + fn2
+		if (_platform == "darwin") : 
+			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
+			long_fn = seg_gt_dir + "/" + fn2			
+		else :
+			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
+			long_fn = seg_gt_dir + "\\" + fn2			
+
+		
 			
 		mask = Image.open(long_fn)
 		mask_out = open(long_fn.replace('.png','.txt'),'w')
