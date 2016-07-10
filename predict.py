@@ -10,6 +10,7 @@ import csv
 import cPickle
 from sklearn.externals import joblib
 import os
+from sys import platform as _platform
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-l', '--list', required = False, help = 'name of batch file')
@@ -19,9 +20,13 @@ file_list =[]
 
 
 #forest = joblib.load('forest.pkl')
+if (_platform == "darwin") : 
+	with open('/Users/18AkhilA/Documents/mel/forest.pkl', 'rb') as f:
+	    forest = cPickle.load(f)
+else :
+	with open('c:\mel\\forest.pkl', 'rb') as f:
+	    forest = cPickle.load(f)
 
-with open('/Users/18AkhilA/Documents/mel/forest.pkl', 'rb') as f:
-    forest = cPickle.load(f)
 
 
 
@@ -32,6 +37,8 @@ if (args['list'] != None) :
 
 	with open(args['list']) as batch_file :
 		for line in batch_file :
+			if line.endswith('.jpg\n') :
+				line = line.replace('.jpg', '.txt')			
 			a = line.strip('\n')
 			file_list.append(a)
 
