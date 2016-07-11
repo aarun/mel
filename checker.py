@@ -21,7 +21,7 @@ with open(args['list']) as batch_file :
 #print file_list
 
 #stnd = np.loadtxt("output6.csv", delimiter= ",")
-print 'image              , accuracy, sensitivity, specificity, dice_coeff, jaccard_ind'
+print 'image , accuracy, sensitivity, specificity, dice_coeff, jaccard_ind'
 for fn in file_list:
     if fn.endswith('.txt'):
 
@@ -99,7 +99,7 @@ for fn in file_list:
 		#image.show()
 		image.save(root_name + '_error.jpg')	
 
-		print root_name, accuracy, sensitivity, specificity, dice_coeff, jaccard_ind
+		print root_name, ',', accuracy, ',', sensitivity, ',', specificity, ',', dice_coeff, ',', jaccard_ind
 		#print accuracy
 		#print sensitivity
 		#print specificity
