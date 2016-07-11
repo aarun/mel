@@ -8,15 +8,15 @@ from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 import csv
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required = True, help = "Path to the image")
-args = vars(ap.parse_args())
-image = img_as_float(io.imread(args["image"]))
-segments = slic(image, n_segments = 3000, sigma = 5, slic_zero = 2)
+#ap = argparse.ArgumentParser()
+#ap.add_argument("-i", "--image", required = True, help = "Path to the image")
+#args = vars(ap.parse_args())
+#image = img_as_float(io.imread(args["image"]))
+#segments = slic(image, n_segments = 3000, sigma = 5, slic_zero = 2)
 
-xr = len(image)
+#xr = len(image)
 #print xr
-yr = len(image[0])
+#yr = len(image[0])
 
 
 data = np.loadtxt("output.csv", delimiter= ",") # feaure file
