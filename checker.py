@@ -95,8 +95,9 @@ for fn in file_list:
 		dice_coeff = (2*tp)/((2*tp) + fn + tp)
 		jaccard_ind = tp/(tp + fn + fp)
 
-		#image = Image.fromarray(imarr_overlay)
+		image = Image.fromarray(imarr_overlay)
 		#image.show()
+		image.save(root_name + '_error.jpg')	
 
 		print root_name, accuracy, sensitivity, specificity, dice_coeff, jaccard_ind
 		#print accuracy
