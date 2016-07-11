@@ -145,7 +145,8 @@ for fn in file_list:
 			energy = greycoprops(glcm, 'energy')[0,0]
 			homogeneity = greycoprops(glcm, 'homogeneity')[0,0]
 
-			distance = sqrt( abs(props[0].centroid[0] - (xr/2))**2 + abs(props[0].centroid[1] - (yr/2))**2 )
+			avg = (xr + yr)/2
+			distance = (sqrt( abs(props[0].centroid[0] - (xr/2))**2 + abs(props[0].centroid[1] - (yr/2))**2 ))/avg
 
 
 			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance]
@@ -208,9 +209,4 @@ for fn in file_list:
 #img3.show()
 #img4.show()
 #img5.show()
-
-
-
-
-
 
