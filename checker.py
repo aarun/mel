@@ -36,12 +36,12 @@ for fn in file_list:
 		truepos = 0
 
 		if (_platform == "darwin") : 
-			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
-			orig_dir = '/Users/sahana/Mel/ISBI2016_ISIC_Part1_Training_Data/'
+			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Test_GroundTruth'
+			orig_dir = '/Users/sahana/Mel/ISBI2016_ISIC_Part1_Test_Data/'
 			gt_fn = seg_gt_dir + "/" + root_name + '_Segmentation.png'			
 		else :
-			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
-			orig_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_Data\\'			
+			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Test_GroundTruth'
+			orig_dir = 'C:\mel\ISBI2016_ISIC_Part1_Test_Data\\'			
 			gt_fn = seg_gt_dir + "\\" + root_name + '_Segmentation.png'			
 
 		gt = Image.open(gt_fn,'r')
