@@ -64,7 +64,10 @@ for fn in file_list :
 			con = []
 			en = []
 			hom = []
+
 			dtc = []
+			nrow = []
+			ncol = []
 
 
 			for row in input_file:
@@ -77,9 +80,13 @@ for fn in file_list :
 				con.append(float(row[" Contrast"]))
 				en.append(float(row[" Energy"]))
 				hom.append(float(row[" Homogeneity"]))
+				
 				dtc.append(float(row[" Distance from center"]))
+				nrow.append(float(row[" Normalized row"]))
+				ncol.append(float(row[" Normalized column"]))
 
-			temp = zip(r, g, b, dis, corr, con, en, hom, dtc)
+
+			temp = zip(r, g, b, dis, corr, con, en, hom, dtc, nrow, ncol)
 
 			data.extend(temp)
 
