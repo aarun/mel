@@ -57,7 +57,6 @@ for fn in file_list:
 		f_out=open(fn.replace('.jpg','.txt'),'w')
 		print 'Processing file: ', fn
 
-
 		fn2 = fn.replace('.jpg', '_superpixels.png')
 
 		original = Image.open(fn)
@@ -66,7 +65,7 @@ for fn in file_list:
 		imarr_orig = np.array(original)
 		imarr_bw = rgb2gray(imarr_orig)
 		imarr_enc = np.array(super_image)
-		imarr_dec = decodeSuperpixelIndex(imarr_orig)
+		imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
 		sp_dict = {}
 
@@ -74,21 +73,17 @@ for fn in file_list:
 		img_col = len(imarr_orig[0])
 		half_diag = (sqrt((img_row**2) + (img_col**2)))/2
 		    
-		centerx = xr/2
-		centery = yr/2
-
 
 		for (i, segVal) in enumerate(np.unique(imarr_dec)) :
 
-			mask2 = np.zeros(segments.shape[:2], dtype='uint8')
-			mask2[segments == segVal] = 255
-			area = len(mask2[segments == segVal])	
+			mask2 = np.zeros(imarr_dec.shape[:2], dtype='uint8')
+			mask2[imarr_dec == segVal] = 255
+			area = len(mask2[imarr_dec == segVal])	
 			sp_locations = mask2[:,:] == 255
 
 			r = (sum(imarr_orig[sp_locations,0]))/area
 			g = (sum(imarr_orig[sp_locations,1]))/area
 			b = (sum(imarr_orig[sp_locations,2]))/area
-
 
 			props = regionprops(mask2, cache=True )
 
@@ -105,12 +100,11 @@ for fn in file_list:
 			homogeneity = greycoprops(glcm, 'homogeneity')[0,0]
 
 			distance = (sqrt( abs(props[0].centroid[0] - (img_row/2))**2 + abs(props[0].centroid[1] - (img_col/2))**2 ))/half_diag
-			nrow = centroid_loc[0]/img_row
-			ncol = centroid_loc[1]/img_col
+			nrow = float(props[0].centroid[0]/img_row)
+			ncol = float(props[0].centroid[0]/img_col)
 
 			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance, nrow, ncol]
 		
-
 
 			dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
 				+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
@@ -119,14 +113,14 @@ for fn in file_list:
 
 
 		for k in sp_dict:
-		    dict_str += (str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' 
-		    	+ str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1]))
-		    	 + ', ' + str(sp_dict[k][2]) + ', ' + str(sp_dict[k][3])
-		    	  + ', ' + str(sp_dict[k][4])+ ', ' + str(sp_dict[k][5]) + ', ' 
-		    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
-		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', '
-		    	   + str(sp_dict[k][10]) + ', ' + str(sp_dict[k][11] + ', '
-		    	   	+ str(sp_dict[k][12]) + '\n')
+			dict_str += (str(k) + ', ' + str(int(sp_dict[k][0][0])) + ', ' 
+				+ str(int(sp_dict[k][0][1])) + ', ' + str(int(sp_dict[k][1]))
+				 + ', ' + str(sp_dict[k][2]) + ', ' + str(sp_dict[k][3])
+				  + ', ' + str(sp_dict[k][4])+ ', ' + str(sp_dict[k][5]) + ', ' 
+				  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
+				  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', '
+				   + str(sp_dict[k][10]) + ', ' + str(sp_dict[k][11]) + ', '
+				   	+ str(sp_dict[k][12]) + '\n')
 
 
 		f_out.write(dict_str)
