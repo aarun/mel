@@ -101,7 +101,7 @@ for fn in file_list :
 
 			#print ground_file.fieldnames
 
-			m = [0]
+			m = []
 
 			for row in ground_file:
 				m.append(int(row[" mask0"]))

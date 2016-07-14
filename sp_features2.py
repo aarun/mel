@@ -166,7 +166,7 @@ for fn in file_list:
 		    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
 		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
 
-		maskdict_str = ('label, mask')
+		maskdict_str = ('label, mask' + '\n')
 
 		for k in maskdict:
 			maskdict_str += (str(k) + ', ' + str(maskdict[k]) + '\n')
