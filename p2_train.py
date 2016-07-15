@@ -48,13 +48,13 @@ else :
 
 		
 for fn in file_list :
-	if (fn.endswith('.txt')) :
+	if (fn.endswith('.jpg')) :
 		if (number == None or counter < number) : 
 
 
 			print 'loading ' + fn
 
-			input_file = csv.DictReader(open(fn))
+			input_file = csv.DictReader(open(fn.replace('.jpg', '.txt')))
 			#print input_file.fieldnames
 
 			r = []
@@ -92,29 +92,33 @@ for fn in file_list :
 
 			data.extend(temp)
 
-			fn2 = fn.replace('.txt', '.json')
+			fn2 = fn.replace('.jpg', '.json')
 
 			if (_platform == "darwin") : 
 				long_fn = seg_gt_dir + "/" + fn2
 			else :
 				long_fn = seg_gt_dir + '\\' + fn2
 
-			ground_file {}
+			ground_file = {}
 
 			with open(long_fn) as gt :
 				ground_file = json.load(gt)
 
 			#print ground_file.fieldnames
 
-			m = [0]
-			n = [0]
+			m = []
+			n = []
 
 			for i in range(len(ground_file['globules'])) :
-				m.append(ground_file['globules'][i])
-				n.append(ground_file['streaks'][i])
+				m.append(int(ground_file['globules'][i]))
+				n.append(int(ground_file['streaks'][i]))
 
 			groundtruth.extend(m)
 			groundtruth2.extend(n)
+
+#			print len(groundtruth)
+#			print len(groundtruth2)
+
 			counter += 1
 
 

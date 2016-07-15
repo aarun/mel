@@ -32,7 +32,7 @@ if (_platform == "darwin") :
 	with open('/Users/18AkhilA/Documents/mel/forest_part2_streaks.pkl', 'rb') as f2:
 	    forest2 = cPickle.load(f2)
 else :
-	with open('c:\mel\\forest_part2_streaks.pkl', 'rb') as f:
+	with open('c:\mel\\forest_part2_streaks.pkl', 'rb') as f2:
 	    forest2 = cPickle.load(f2)
 
 
@@ -56,10 +56,10 @@ else :
 
 
 for fn in file_list :
-	if (fn.endswith('.jpg')) :
+	if (fn.endswith('.txt')) :
 		
 
-		input_file = csv.DictReader(open(fn.replace('.jpg', '.txt')))
+		input_file = csv.DictReader(open(fn))
 		print "Predicting " + fn
 		#print input_file.fieldnames
 
@@ -102,8 +102,8 @@ for fn in file_list :
 
 		prediction = forest.predict(temp)
 		prediction2 = forest2.predict(temp)
-		fn2 = fn.replace('.jpg', '_Globule_Prediction.csv')
-		fn3 = fn.replace('.jpg', '_Streak_Prediction.csv')
+		fn2 = fn.replace('.txt', '_Globule_Prediction.csv')
+		fn3 = fn.replace('.txt', '_Streak_Prediction.csv')
 		#f_out=open(fn2,'w')
 		#pred_string = ()
 
@@ -115,7 +115,7 @@ for fn in file_list :
 
 		w2 = csv.writer(open(fn3, "w"))
 		for i in range(len(prediction2)):
-			w2.writerow([prediction[i]])
+			w2.writerow([prediction2[i]])
 
 
 
