@@ -12,17 +12,19 @@ from sklearn.externals import joblib
 import os
 from sys import platform as _platform
 
+
 ap = argparse.ArgumentParser()
 ap.add_argument('-n', '--number', required = False, help = 'number of files')
 ap.add_argument('-l', '--list', required = False, help = 'name of batch file')
 args = vars(ap.parse_args())
-#args2 = vars(ap.parse_args())
 number = None
+
+
 if (args['number'] != None) :
 	number = int(args['number'])
 
-
 file_list =[]
+
 
 if (args['list'] != None) :
 	with open(args['list']) as batch_file :
@@ -34,26 +36,23 @@ else :
 		file_list.append(fn)
 
 
-	#print args
-
 data = []
 groundtruth = []
+groundtruth2 = []
 counter = 0
 if (_platform == "darwin") : 
-	seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
+	gt_fn = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part3_Training_GroundTruth.csv'
 else :
-	seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
+	gt_fn = 'C:\mel\ISBI2016_ISIC_Part2_Training_GroundTruth.csv'
 
 		
+
 for fn in file_list :
 	if (fn.endswith('.txt')) :
 		if (number == None or counter < number) : 
 
-
 			print 'loading ' + fn
-
 			input_file = csv.DictReader(open(fn))
-			#print input_file.fieldnames
 
 			r = []
 			g = []
@@ -87,57 +86,32 @@ for fn in file_list :
 
 
 			temp = zip(r, g, b, dis, corr, con, en, hom, dtc, nrow, ncol)
-
 			data.extend(temp)
 
-			fn2 = fn.replace('.txt', '_Segmentation.txt')
-
-			if (_platform == "darwin") : 
-				long_fn = seg_gt_dir + "/" + fn2
-			else :
-				long_fn = seg_gt_dir + '\\' + fn2
-
-			ground_file = csv.DictReader(open(long_fn))
-
-			#print ground_file.fieldnames
+			ground_file = csv.DictReader(gt_fn)
 
 			m = []
 
-			for row in ground_file:
-				m.append(int(row[" mask0"]))
+			for row in ground_file :
+				if (row[1] == 'benign') :
+					m.append(1)
+				else :
+					m.append(0)
 
 			groundtruth.extend(m)
 			counter += 1
 
-
-
 	
-			
-			
-
 print 'TRAINING'
-forest = RandomForestRegressor(n_estimators = 500, n_jobs = 6)
+forest = RandomForestRegressor(n_estimators = 500, n_jobs = 8)
 forest.fit(data, groundtruth)
 
 
-
 if (_platform == "darwin") : 
-	with open('/Users/18AkhilA/Documents/mel/forest.pkl', 'wb') as f:
+	with open('/Users/sahana/mel/forest_part3.pkl', 'wb') as f:
 	    cPickle.dump(forest, f)
 else :
-	with open('c:\mel\\forest.pkl', 'wb') as f:
+	with open('c:\mel\\forest_part3.pkl', 'wb') as f:
 	    cPickle.dump(forest, f)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	  

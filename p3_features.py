@@ -54,44 +54,14 @@ counter = 0
 
 for fn in file_list:
     if fn.endswith('jpg') :
-		#maskfn = 'ADD LOCATION'
 		f_out=open(fn.replace('.jpg','.txt'),'w')
 		print 'Processing file: ', fn
-		#image = Image.open(fn)
-		#assert image.mode == 'RGB'
-		#imarr_enc = np.array(image)
-		#imarr_dec = decodeSuperpixelIndex(imarr_enc)
 
 		original = Image.open(fn)
-
-		
-		mask = None
-		mask_out = None
-
-		fn2 = fn.replace('.jpg', '_Segmentation.png')
-
-		if (_platform == "darwin") : 
-			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
-			long_fn = seg_gt_dir + "/" + fn2			
-		else :
-			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
-			long_fn = seg_gt_dir + "\\" + fn2			
-
-		
-			
-		mask = Image.open(long_fn)
-		mask_out = open(long_fn.replace('.png','.txt'),'w')
-			
-
-		imarr_mask = np.array(mask)
-
-		#mask = Image.open(maskfn)
-		#imarr_mask = np.array(mask)
 		imarr_orig = np.array(original)
 		imarr_bw = rgb2gray(imarr_orig)
 
 		segments = slic(original, n_segments = 3000, sigma = 5, slic_zero = 2)
-
 
 		sp_dict = {}
 
@@ -99,24 +69,12 @@ for fn in file_list:
 		img_col = len(imarr_orig[0])
 		half_diag = (sqrt((img_row**2) + (img_col**2)))/2
 
-		gt_dict = collections.Counter()
-		maskdict = collections.Counter()
-
-
 		for (i, segVal) in enumerate(np.unique(segments)) :
 
 			mask2 = np.zeros(segments.shape[:2], dtype='uint8')
 			mask2[segments == segVal] = 255
 			area = len(mask2[segments == segVal])	
 			sp_locations = mask2[:,:] == 255
-
-
-			gt_dict[segVal] = np.sum(imarr_mask[segments == segVal])
-
-			if (gt_dict[segVal] / area > 127.5) :
-				maskdict[segVal] = 1
-			else :
-				maskdict[segVal] = 0
 
 
 			r = (sum(imarr_orig[sp_locations,0]))/area
@@ -143,8 +101,6 @@ for fn in file_list:
 			ncol = float(props[0].centroid[0]/img_col)
 
 			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance, nrow, ncol]
-		
-
 
 			dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
 				+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
@@ -162,47 +118,6 @@ for fn in file_list:
 				   + str(sp_dict[k][10]) + ', ' + str(sp_dict[k][11]) + ', '
 				   	+ str(sp_dict[k][12]) + '\n')
 
-		maskdict_str = ('label, mask' + '\n')
-
-		for k in maskdict:
-			maskdict_str += (str(k) + ', ' + str(maskdict[k]) + '\n')
-
-
 		f_out.write(dict_str)
-		mask_out.write(maskdict_str)
-		mask_out.close()
 		f_out.close()
-		counter += 1
-
-#imarr_diss = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
-#imarr_corr = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
-#imarr_cont = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
-#imarr_energy = np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
-#imarr_homo =  np.zeros((len(imarr_dec),len(imarr_dec[0])), dtype=np.uint8 )
-
-#for row in range(imarr_diss.shape[0]) :
-#	for col in range(imarr_diss.shape[1]) :
-#
-#		imarr_diss[row][col] = int((sp_dict[segments[row][col]][5])*(25500/367))
-#		if corr < 0:
-#			corr = 0
-#		imarr_corr[row][col] = corr
-#		cont = int((sp_dict[segments[row][col]][7])*255)
-#			cont = 255
-#		imarr_cont[row][col] = cont
-#		imarr_energy[row][col] = int((sp_dict[segments[row][col]][8])*255)
-#		imarr_homo[row][col] = int((sp_dict[segments[row][col]][9])*255)
-
-
-		
-#img = Image.fromarray(imarr_diss)
-#img2 = Image.fromarray(imarr_corr)
-#img3 = Image.fromarray(imarr_cont)
-#img4 = Image.fromarray(imarr_energy)
-#img5 = Image.fromarray(imarr_homo)
-#img.show()
-#img2.show()
-#img3.show()
-#img4.show()
-#img5.show()
 
