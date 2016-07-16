@@ -4,6 +4,7 @@ from PIL import Image
 from sys import platform as _platform
 import argparse
 from sklearn.metrics import roc_auc_score
+import csv
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-l', '--list', required = True, help = 'name of batch file')
@@ -19,9 +20,9 @@ with open(args['list']) as batch_file :
 		a = line.strip('\n')
 		file_list.append(a)
 
-
 for fn in file_list:
     if fn.endswith('.jpg'):
+
 
 		root_name = fn.strip('.jpg')
 		g_prediction = np.loadtxt(root_name+'_Globule_Prediction.csv', delimiter= ",")
@@ -101,12 +102,20 @@ for fn in file_list:
 		g_specificity = gtn/(gtn + gfp)
 		g_auc = roc_auc_score(ground_file['globules'], g_prediction)
 		g_ap = average_precision_score(ground_file['globules'], g_prediction)
+		g_jaccard_ind = gtp/(gtp + gfn + gfp)
+
 
 		s_accuracy = (stp + stn)/(stp + sfp + stn + sfn)
 		s_sensitivity = stp/(stp + sfn)
 		s_specificity = stn/(stn + sfp)
 		s_auc = roc_auc_score(ground_file['streaks'], s_prediction)
 		s_ap = average_precision_score(ground_file['streaks'], s_prediction)
+		s_jaccard_ind = stp/(stp + sfn + sfp)
+
+		print root_name, ',', 'globule', g_accuracy, ',', g_sensitivity, ',', g_specificity, ',', g_auc, ',', g_ap, ',', g_jaccard_ind
+		print root_name, ',', 'streak', s_accuracy, ',', s_sensitivity, ',', s_specificity, ',', s_auc, ',', s_ap, ',', s_jaccard_ind
+
+
 
 		g_image = Image.fromarray(g_imarr_overlay)
 		s_image = Image.fromarray(s_imarr_overlay)
