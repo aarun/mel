@@ -38,35 +38,39 @@ else :
 
 data = []
 groundtruth = []
-groundtruth2 = []
+
 counter = 0
 if (_platform == "darwin") : 
-	gt_fn = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part3_Training_GroundTruth.csv'
+	gt_fn = '/Users/sahana/Mel/mel/ISBI2016_ISIC_Part3_Training_GroundTruth.csv'
 else :
-	gt_fn = 'C:\mel\ISBI2016_ISIC_Part2_Training_GroundTruth.csv'
+	gt_fn = 'C:\mel\ISBI2016_ISIC_Part3_Training_GroundTruth.csv'
 
 		
 
 for fn in file_list :
-	if (fn.endswith('.txt')) :
+	if (fn.endswith('.jpg')) :
 		if (number == None or counter < number) : 
 
 			print 'loading ' + fn
-			input_file = csv.DictReader(open(fn))
+			input_file = csv.DictReader(open(fn.replace('.jpg', '.txt')))
 
-			r = []
-			g = []
-			b = []
+			features = []
 
-			dis = []
-			corr = []
-			con = []
-			en = []
-			hom = []
 
-			dtc = []
-			nrow = []
-			ncol = []
+			for row in input_file:
+				r = []
+				g = []
+				b = []
+
+				dis = []
+				corr = []
+				con = []
+				en = []
+				hom = []
+
+				dtc = []
+				nrow = []
+				ncol = []
 
 
 			for row in input_file:
@@ -84,23 +88,23 @@ for fn in file_list :
 				nrow.append(float(row[" Normalized row"]))
 				ncol.append(float(row[" Normalized column"]))
 
+			temp = [r, g, b, dis, corr, con, en, hom, dtc, nrow, ncol]
 
-			temp = zip(r, g, b, dis, corr, con, en, hom, dtc, nrow, ncol)
-			data.extend(temp)
-
-			ground_file = csv.DictReader(gt_fn)
-
-			m = []
-
-			for row in ground_file :
-				if (row[1] == 'benign') :
-					m.append(1)
-				else :
-					m.append(0)
-
-			groundtruth.extend(m)
+			data.append(temp)
 			counter += 1
 
+m = []
+
+with open(gt_fn) as gt :
+	ground_file = csv.DictReader(gt)
+	for row in ground_file :
+		if (row["label"] == 'benign') :
+			m.append(int(0))
+		else :
+			m.append(int(1))
+
+groundtruth.extend(m)
+print 'Label length: ' + str(len(groundtruth))
 	
 print 'TRAINING'
 forest = RandomForestRegressor(n_estimators = 500, n_jobs = 8)
@@ -113,5 +117,3 @@ if (_platform == "darwin") :
 else :
 	with open('c:\mel\\forest_part3.pkl', 'wb') as f:
 	    cPickle.dump(forest, f)
-
-	  
