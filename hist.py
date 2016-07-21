@@ -148,7 +148,7 @@ for fn in file_list:
                   + str(feature_arr[i][6]) + ', ' + str(feature_arr[i][7]) + ', ' 
                   + str(feature_arr[i][8]) + ', ' + str(feature_arr[i][9])  + ', ' + str(feature_arr[i][10]) + 
                   ', ' + str(feature_arr[i][11]) + ', ' + str(feature_arr[i][12]) + ', '
-                  + str(feature_arr[i][13]) + ', ' + str(feature_arr[i][14]) + str(feature_arr[i][15]) + 
+                  + str(feature_arr[i][13]) + ', ' + str(feature_arr[i][14]) + ', ' + str(feature_arr[i][15]) + 
                   ', ' + str(feature_arr[i][16]) + ', ' + str(feature_arr[i][17])+', ' + str(feature_arr[i][18])+
                   ', ' + str(feature_arr[i][19]) + ', ' + str(feature_arr[i][20]) + ', ' + str(feature_arr[i][21]) +
                   ', ' + str(feature_arr[i][22]) + ', ' + str(feature_arr[i][23]) + ', ' + str(feature_arr[i][24]) 
