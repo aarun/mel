@@ -98,16 +98,9 @@ for fn in file_list:
 		both = {} # distance in both directions
 
 
-		xr = len(imarr_orig)
-		yr = len(imarr_orig[0])
-
-		gt_dict = collections.Counter()
-		maskdict = collections.Counter()
-		    
-		centerx = xr/2
-		centery = yr/2
-
-
+		img_row = len(imarr_orig)
+		img_col = len(imarr_orig[0])
+		half_diag = (sqrt((img_row**2) + (img_col**2)))/2
 
 		for (i, segVal) in enumerate(np.unique(segments)) :
 		#for (i, segVal) in enumerate([0,1]):	
@@ -145,16 +138,17 @@ for fn in file_list:
 			energy = greycoprops(glcm, 'energy')[0,0]
 			homogeneity = greycoprops(glcm, 'homogeneity')[0,0]
 
-			distance = sqrt( abs(props[0].centroid[0] - (xr/2))**2 + abs(props[0].centroid[1] - (yr/2))**2 )
+			distance = (sqrt( abs(props[0].centroid[0] - (img_row/2))**2 + abs(props[0].centroid[1] - (img_col/2))**2 ))/half_diag
+			nrow = float(props[0].centroid[0]/img_row)
+			ncol = float(props[0].centroid[0]/img_col)
 
-
-			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance]
+			sp_dict[segVal] = [props[0].centroid, area, r, g, b, dissimilarity, correlation, contrast, energy, homogeneity, distance, nrow, ncol]
 		
 
 
 			dict_str = ('Superpixel label, Centroid row, Centroid column, Area,'
 				+ ' Avg R value, Avg G value, Avg B value, Dissimilarity, Correlation,'
-				+ ' Contrast, Energy, Homogeneity, Distance from center' + '\n')
+				+ ' Contrast, Energy, Homogeneity, Distance from center, Normalized row, Normalized column' + '\n')
 
 
 		for k in sp_dict:
@@ -163,7 +157,9 @@ for fn in file_list:
 		    	 + ', ' + str(sp_dict[k][2]) + ', ' + str(sp_dict[k][3])
 		    	  + ', ' + str(sp_dict[k][4])+ ', ' + str(sp_dict[k][5]) + ', ' 
 		    	  + str(sp_dict[k][6]) + ', ' + str(sp_dict[k][7]) + ', ' 
-		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' + str(sp_dict[k][10]) + '\n')
+		    	  + str(sp_dict[k][8]) + ', ' + str(sp_dict[k][9])  + ', ' 
+		    	  + str(sp_dict[k][10]) + ', ' + str(sp_dict[k][11]) + ', '
+				   	+ str(sp_dict[k][12]) +'\n')
 
 		#maskdict_str = ('label, mask')
 
