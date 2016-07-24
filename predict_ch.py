@@ -81,6 +81,7 @@ for fn in file_list :
 		b4 = []
 		b5 = []
 		b6 = []
+		b7 = []
 
 		dis = []
 		corr = []
