@@ -42,8 +42,15 @@ else :
 	for fn in os.listdir('.') :
 		file_list.append(fn)
 
-
-
+filename = '/Users/18AkhilA/Downloads/ISBI2016_ISIC_Part1_Training_ch/network.json'
+filename2 = '/Users/18AkhilA/Downloads/ISBI2016_ISIC_Part1_Training_ch/model.h5'
+json_file = open(filename, 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+model = model_from_json(loaded_model_json)
+# load weights into new model
+model.load_weights(filename2)
+print("Loaded model from disk")
 
 
 
@@ -81,6 +88,8 @@ for fn in file_list :
 			r5 = []
 			r6 = []
 			r7 = []
+
+			data = []
 
 			g0 = []
 			g1 = []
@@ -157,53 +166,17 @@ for fn in file_list :
 
 			data.extend(temp)
 
-			fn2 = fn.replace('.txt', '_Segmentation.txt')
-
-			if (_platform == "darwin") : 
-				long_fn = seg_gt_dir + "/" + fn2
-			else :
-				long_fn = seg_gt_dir + '\\' + fn2
-
-			ground_file = csv.DictReader(open(long_fn))
-
-			#print ground_file.fieldnames
-
-			keys = ground_file.fieldnames
-
-			m = [keys[2]]
-
-			for row in ground_file:
-				m.append(int(row[" mask0"]))
-
-			groundtruth.extend(m)
 			counter += 1
 
+			prediction = model.predict(data)
+
+			fn2 = fn.replace('.txt', '_Prediction.csv')
 
 
+			w = csv.writer(open(fn2, "w"))
+			for i in range(len(prediction)):
 
-
-model = Sequential()
-
-model.add(Dense(32, init='uniform', input_dim = 32))
-
-model.add(Dense(16, init='uniform', activation='relu'))
-
-model.add(Dense(1, init='uniform', activation='sigmoid'))
-
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-model.fit(data, groundtruth, nb_epoch=10, batch_size=10)
-
-scores = model.evaluate(data, groundtruth)
-print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-
-
-model_json = model.to_json()
-with open("network.json", "w") as json_file:
-    json_file.write(model_json)
-# serialize weights to HDF5
-model.save_weights("model.h5")
-print("Saved model to disk")
+				w.writerow([prediction[i][0]])
 
 
 
