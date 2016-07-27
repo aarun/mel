@@ -24,20 +24,20 @@ ap.add_argument('-l', '--list', required = False, help = 'name of batch file')
 args = vars(ap.parse_args())
 
 file_list =[]
-path = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training/'
+
 
 if (args['list'] != None) :
 	with open(args['list']) as batch_file :
 		for line in batch_file :
-			if line.endswith('.jpg\n') :
-				line = line.replace('.jpg', '.txt')			
+			if line.endswith('.txt') :
+				line = line.replace('.txt', '.jpg')			
 			a = line.strip('\n')
 			file_list.append(a)
 else :
 	for fn in os.listdir('.') :
 		file_list.append(fn)
 
-
+print file_list
 
 for fn in file_list :
 	if (fn.endswith('.txt')) :
@@ -50,6 +50,7 @@ for fn in file_list :
 		fn3 = fn.replace('.txt', '_neighbors.txt')
 		original = Image.open(fn2)
 		imarr_orig = np.array(original)
+		#print imarr_orig
 		segments = slic(original, n_segments = 3000, sigma = 5, slic_zero = 2)
 
 		fig = plt.figure("Superpixels -- %d segments" % (5000))
@@ -164,6 +165,81 @@ for fn in file_list :
 			else :
 				neighbors.append(-1)
 
+			x = (int)(props[0].centroid[0])
+			y = (int)(props[0].centroid[1])
+			currlbl = olbl
+
+
+
+			#bottomright
+			while currlbl == olbl and y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0:
+				currlbl = segments[x][y]
+				y +=1
+				x +=1
+			if (y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0) :
+				
+				neighbors.append(currlbl)
+				left = True
+			else :
+				neighbors.append(-1)
+
+			x = (int)(props[0].centroid[0])
+			y = (int)(props[0].centroid[1])
+			currlbl = olbl
+
+
+
+			#topleft
+			while currlbl == olbl and y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0:
+				currlbl = segments[x][y]
+				y -=1
+				x -=1
+			if (y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0) :
+				
+				neighbors.append(currlbl)
+				left = True
+			else :
+				neighbors.append(-1)
+
+			x = (int)(props[0].centroid[0])
+			y = (int)(props[0].centroid[1])
+			currlbl = olbl
+
+
+
+			#top right
+			while currlbl == olbl and y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0:
+				currlbl = segments[x][y]
+				x +=1
+				y -=1
+			if (y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0) :
+				
+				neighbors.append(currlbl)
+				left = True
+			else :
+				neighbors.append(-1)
+
+			x = (int)(props[0].centroid[0])
+			y = (int)(props[0].centroid[1])
+			currlbl = olbl
+
+
+			#bottomleft
+			while currlbl == olbl and y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0:
+				currlbl = segments[x][y]
+				x -=1
+				y +=1
+			if (y < len(imarr_orig[0]) and y > 0 and x < len(imarr_orig) and x >= 0) :
+				
+				neighbors.append(currlbl)
+				left = True
+			else :
+				neighbors.append(-1)
+
+
+
+
+
 			graph.append(neighbors)
 
 
@@ -175,10 +251,11 @@ for fn in file_list :
 
 		f_out = (open(fn3,'w'))
 
-		graph_s = ('label, south, north, east, west' + '\n')
+		graph_s = ('label, south, north, east, west, southeast, northwest, northeast, southwest' + '\n')
 
 		for k in range(len(graph)) :
-			graph_s += (str(graph[k][0]) + ', ' + str(graph[k][1])+ ', '+ str(graph[k][2])+ ', ' + str(graph[k][3]) +', ' + str(graph[k][4]) +  '\n')
+			graph_s += (str(graph[k][0]) + ', ' + str(graph[k][1])+ ', '+ str(graph[k][2])+ ', ' + str(graph[k][3]) +', ' + str(graph[k][4]) + 
+			', ' + str(graph[k][5]) +', ' + str(graph[k][6]) +', ' + str(graph[k][7]) +', ' + str(graph[k][8]) + '\n')
 
 
 		f_out.write(graph_s)
