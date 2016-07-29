@@ -42,6 +42,8 @@ if (args['list'] != None) :
 	with open(args['list']) as batch_file :
 		for line in batch_file :
 			a = line.strip('\n')
+			if('\r' in a) :
+				a = a.strip('\r')
 			file_list.append(a)
 else :
 	for fn in os.listdir('.') :
@@ -53,7 +55,7 @@ else :
 
 
 
-
+print len(file_list)
 
 
 
@@ -125,6 +127,7 @@ for fn in file_list :
 				southwest.append(int(row[" southwest"]))
 
 			tempn = zip(south, north, east, west, southeast, northwest, northeast, southwest)
+			#print len(tempn)
 			neighbors.extend(tempn)
 
 
@@ -148,11 +151,12 @@ for fn in file_list :
 
 			groundtruth.extend(m)
 			counter += 1
-print "finish load. start placement", len(data)
+print "finish load. start placement", len(data), len(groundtruth), len(neighbors)
 fulldata = []
 
 for i in range(len(data)):
 	tempd = np.zeros((3, 3))
+	#print i
 
 	tempd[2][1] = neighbors[i][0]
 	tempd[0][1] = neighbors[i][1]
@@ -186,18 +190,71 @@ for i in range(len(data)):
 
 
 
-
+print "starting fit"
 model = Sequential()
 
-model.add(UpSampling2D(size=(10, 10), input_shape=( 3, 3, 3)))
+model.add(UpSampling2D(size=(3, 3), input_shape=( 3, 3, 3)))
+model.add(ZeroPadding2D((1,1))) 
+model.add(Convolution2D(16, 3, 3, activation='relu', name='conv1_1'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(16, 3, 3, activation='relu', name='conv1_2'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
 
-model.add(ZeroPadding2D(padding=(0, 1, 1)))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(8, 3, 3, activation='relu', name='conv2_1'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(8, 3, 3, activation='relu', name='conv2_2'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_1'))
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_2'))
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_3'))
+#model.add(MaxPooling2D((2,2), strides=(2,2)))
+
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_1'))
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_2'))
+#model.add(ZeroPadding2D((1,1)))
+#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_3'))
+#model.add(MaxPooling2D((2,2), strides=(2,2)))
+
+
+model.add(Flatten(name="flatten"))
+model.add(Dense(10, activation='relu', name='dense_1'))
+model.add(Dropout(0.5))
+#model.add(Dense(102, activation='relu', name='dense_2'))
+#model.add(Dropout(0.5))
+model.add(Dense(1, name='dense_3'))
+model.add(Activation("sigmoid",name="sigmoid"))
+
+print model.summary()
+
+
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+print "starting fit"
+
+model.fit(np.asarray(fulldata), np.asarray(groundtruth), nb_epoch=2, batch_size=10)
+
+scores = model.evaluate(np.asarray(fulldata), np.asarray(groundtruth))
+print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+
+
+"""
+
+model.add(UpSampling2D(size=(2, 2), input_shape=( 3, 3, 3)))
+
+#model.add(ZeroPadding2D(padding=(0, 1, 1)))
 
 
 model.add(Convolution2D(nb_filter=6, nb_row = 3, nb_col = 3))
 model.add(Activation('relu'))
 model.add(Dropout(0.25))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+#model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
 
@@ -208,26 +265,26 @@ model.add(Convolution2D(nb_filter=3, nb_row = 3, nb_col = 3))
 model.add(Activation('relu'))
 model.add(Dropout(0.25))
 #model.add(MaxPooling2D(pool_size=(2, 2)))
-#model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
+model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
 
 model.add(Convolution2D(1, 3, 3))
 model.add(Activation('relu'))
 model.add(Dropout(0.25))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-#model.add(Dropout(0.5))
-#model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
 #model.add(MaxPooling2D(pool_size=(2, 2)))
+#model.add(Dropout(0.5))
+model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
+
+model.add(MaxPooling2D(pool_size=(2, 2)))
 
 
-model.add(Flatten())
+#model.add(Flatten())
 
-model.add(Dense(30))#, activation='softmax'))
+#model.add(Dense(30))#, activation='softmax'))
+#model.add(Activation('relu'))
+
+model.add(Dense(3))#, activation='softmax'))
 model.add(Activation('relu'))
-
-model.add(Dense(15))#, activation='softmax'))
-model.add(Activation('relu'))
-
+model.add(Dropout(0.25))
 #model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
 
 model.add(Dense(1))#, activation='softmax'))
@@ -242,11 +299,12 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 
 print "starting fit"
 
-model.fit(np.asarray(fulldata), np.asarray(groundtruth), nb_epoch=50, batch_size=10)
+model.fit(np.asarray(fulldata), np.asarray(groundtruth), nb_epoch=25, batch_size=10)
 
 scores = model.evaluate(np.asarray(fulldata), np.asarray(groundtruth))
 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
+"""
 
 model_json = model.to_json()
 with open("convnetwork.json", "w") as json_file:
