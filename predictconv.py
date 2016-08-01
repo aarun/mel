@@ -72,7 +72,10 @@ else :
 
 		
 for fn in file_list :
-	if (fn.endswith('.txt')) :
+	if (fn.endswith('neighbors.txt')):
+		print "wrong"
+
+	elif (fn.endswith('.txt')) :
 		if (number == None or counter < number) : 
 
 
@@ -84,18 +87,37 @@ for fn in file_list :
 			r = []
 			g = []
 			b = []
+			gray = []
+			dis = []
+			corr = []
+			con = []
+			en = []
+			hom = []
 
 
 
 
 			for row in input_file:
 				r.append(float(row[" Avg R value"]))
+				red = float(row[" Avg R value"])
+				#print r
 				g.append(float(row[" Avg G value"]))
+				green = float(row[" Avg G value"])
 				b.append(float(row[" Avg B value"]))
+				blue = float(row[" Avg B value"])
+
+				tempgray = 0.2989*red + 0.5870*green + 0.1140*blue
+
+				gray.append(tempgray)
+				#dis.append(float(row[" Dissimilarity"]))
+				#corr.append(float(row[" Correlation"]))
+				#con.append(float(row[" Contrast"]))
+				#en.append(float(row[" Energy"]))
+				#hom.append(float(row[" Homogeneity"]))
 
 
 
-			temp = zip(r,g,b)
+			temp = zip(r, g, b) #dis, corr, con, en, hom)
 
 			data.extend(temp)
 
@@ -169,6 +191,10 @@ for fn in file_list :
 				fulldata.append(tempf)
 
 			print "predicting"
+
+			fulldata = np.asarray(fulldata)
+			fulldata = fulldata.reshape(fulldata.shape[0], 3, 3, 3)
+
 
 			prediction = model.predict(np.asarray(fulldata))
 

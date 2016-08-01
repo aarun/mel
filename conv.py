@@ -7,6 +7,9 @@ from keras.layers.convolutional import ZeroPadding2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers import Flatten
 from keras.layers import Dropout
+from keras.callbacks import EarlyStopping
+from keras.optimizers import SGD
+from keras.optimizers import RMSprop
 import numpy as np
 from PIL import Image
 import argparse
@@ -33,7 +36,7 @@ number = None
 if (args['number'] != None) :
 	number = int(args['number'])
 
-
+# notes which files to process
 file_list =[]
 
 checker = []
@@ -55,7 +58,7 @@ else :
 
 
 
-print len(file_list)
+
 
 
 
@@ -65,6 +68,8 @@ data = []
 neighbors = []
 groundtruth = []
 counter = 0
+counts = []
+count1 = 0
 if (_platform == "darwin") : 
 	seg_gt_dir = '/Users/18AkhilA/Downloads/ISBI_2016_Part1_Training_GroundTruth'
 else :
@@ -75,6 +80,9 @@ for fn in file_list :
 	if (fn.endswith('.txt')) :
 		if (number == None or counter < number) : 
 
+			# This section creates the feature vector to feed to the network. It reads the RGB value of
+			# each superpixel and adds it to a list. 
+
 
 			print 'loading ' + fn
 
@@ -84,18 +92,35 @@ for fn in file_list :
 			r = []
 			g = []
 			b = []
+			gray = []
+			dis = []
+			corr = []
+			con = []
+			en = []
+			hom = []
 
 
 
 
 			for row in input_file:
 				r.append(float(row[" Avg R value"]))
+				red = float(row[" Avg R value"])
+				#print r
 				g.append(float(row[" Avg G value"]))
+				green = float(row[" Avg G value"])
 				b.append(float(row[" Avg B value"]))
+				blue = float(row[" Avg B value"])
 
 
 
-			temp = zip(r,g,b)
+				tempgray = 0.2989*red + 0.5870*green + 0.1140*blue #gray scale converter(not using it right now)
+
+				gray.append(tempgray)
+
+
+
+
+			temp = zip(r, g, b) 
 
 			data.extend(temp)
 
@@ -104,6 +129,8 @@ for fn in file_list :
 			fn3 = fn.replace('.txt', '_neighbors.txt')
 
 			neigh_file = csv.DictReader(open(fn3))
+
+			# This section reads a file which states the neighbors of each superpixel
 
 			south = []
 			north = []
@@ -127,7 +154,7 @@ for fn in file_list :
 				southwest.append(int(row[" southwest"]))
 
 			tempn = zip(south, north, east, west, southeast, northwest, northeast, southwest)
-			#print len(tempn)
+			
 			neighbors.extend(tempn)
 
 
@@ -140,23 +167,36 @@ for fn in file_list :
 
 			ground_file = csv.DictReader(open(long_fn))
 
-			#print ground_file.fieldnames
+			# This section reads the groundtruth file
 
 			keys = ground_file.fieldnames
 
-			m = [keys[2]]
+			m = []
+			
 
 			for row in ground_file:
-				m.append(int(row[" mask0"]))
+				m.append(int(row[" mask"]))
+				htemp = int(row[" mask"])
+				if (htemp == 1):
+					count1 += 1
+
+			counts.append(count1)
+
+
 
 			groundtruth.extend(m)
 			counter += 1
-print "finish load. start placement", len(data), len(groundtruth), len(neighbors)
-fulldata = []
+print "finish load. start placement", len(data), len(groundtruth), len(neighbors), len(counts)
 
+#This part of the code creates a 3x3 grid of the RGB values of each superpixel and its neighbors
+
+fulldata = []
+fullground = []
+checkcount = 0
+count1 = count1
 for i in range(len(data)):
 	tempd = np.zeros((3, 3))
-	#print i
+	
 
 	tempd[2][1] = neighbors[i][0]
 	tempd[0][1] = neighbors[i][1]
@@ -168,7 +208,7 @@ for i in range(len(data)):
 	tempd[2][0] = neighbors[i][1]
 	tempd[1][1] = i
 
-	#print tempd
+	
 
 	tempf = np.zeros(( 3, 3, 3))
 
@@ -179,132 +219,70 @@ for i in range(len(data)):
 				tempf[j][z] = [0, 0, 0]
 			else :
 				tempf[j][z] = data[index]
+	
+	# This is the limiting thing I mentioned in my email. I am checking to see if the number of non-bordering
+	# superpixels equal the number of bordering ones.
+	if (groundtruth[i] == 1) :
+		fulldata.append(tempf)
+		fullground.append(groundtruth[i])
+	else :
+		if (checkcount < count1) :
+			fulldata.append(tempf)
+			fullground.append(groundtruth[i])
+			checkcount +=1
 
-	fulldata.append(tempf)
 
 
 
 
 
-#print groundtruth
 
 
+# This part is the actual conv. net
 
 print "starting fit"
 model = Sequential()
 
-model.add(UpSampling2D(size=(3, 3), input_shape=( 3, 3, 3)))
-model.add(ZeroPadding2D((1,1))) 
-model.add(Convolution2D(16, 3, 3, activation='relu', name='conv1_1'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(16, 3, 3, activation='relu', name='conv1_2'))
+
+
+
+model.add(ZeroPadding2D((1,1), input_shape=( 3, 3, 3))) 
+model.add(Convolution2D(16, 3, 3, name='conv1_1'))
+model.add(Activation('relu'))
+
 model.add(MaxPooling2D((2,2), strides=(2,2)))
 
+
 model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(8, 3, 3, activation='relu', name='conv2_1'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(8, 3, 3, activation='relu', name='conv2_2'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(Convolution2D(8, 3, 3, name='conv2_1'))
+model.add(Activation('relu'))
 
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_1'))
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_2'))
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(64, 3, 3, activation='relu', name='conv3_3'))
-#model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_1'))
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_2'))
-#model.add(ZeroPadding2D((1,1)))
-#model.add(Convolution2D(128, 3, 3, activation='relu', name='conv4_3'))
-#model.add(MaxPooling2D((2,2), strides=(2,2)))
-
+print model.summary()
 
 model.add(Flatten(name="flatten"))
-model.add(Dense(10, activation='relu', name='dense_1'))
-model.add(Dropout(0.5))
-#model.add(Dense(102, activation='relu', name='dense_2'))
-#model.add(Dropout(0.5))
-model.add(Dense(1, name='dense_3'))
-model.add(Activation("sigmoid",name="sigmoid"))
+model.add(Dense(64, init='uniform'))
+model.add(Activation('relu'))
 
-print model.summary()
+model.add(Dense(1, activation='sigmoid'))
 
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+sgd = SGD(lr=0.001, decay=1e-6, momentum=1, nesterov=True)
+
+
+
+model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+fulldata = np.asarray(fulldata)
+fulldata = fulldata.reshape(fulldata.shape[0], 3, 3, 3)
 print "starting fit"
 
-model.fit(np.asarray(fulldata), np.asarray(groundtruth), nb_epoch=2, batch_size=10)
-
-scores = model.evaluate(np.asarray(fulldata), np.asarray(groundtruth))
+model.fit(np.asarray(fulldata), np.asarray(fullground), nb_epoch=20, batch_size=10, validation_split=0.2)
+scores = model.evaluate(np.asarray(fulldata), np.asarray(fullground))
 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 
-"""
-
-model.add(UpSampling2D(size=(2, 2), input_shape=( 3, 3, 3)))
-
-#model.add(ZeroPadding2D(padding=(0, 1, 1)))
-
-
-model.add(Convolution2D(nb_filter=6, nb_row = 3, nb_col = 3))
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-#model.add(MaxPooling2D(pool_size=(2, 2)))
-
-model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
-
-#model.add(UpSampling2D(size=(2, 2)))
-
-model.add(Convolution2D(nb_filter=3, nb_row = 3, nb_col = 3))
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-#model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
-model.add(Convolution2D(1, 3, 3))
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-#model.add(MaxPooling2D(pool_size=(2, 2)))
-#model.add(Dropout(0.5))
-model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
-model.add(MaxPooling2D(pool_size=(2, 2)))
-
-
-#model.add(Flatten())
-
-#model.add(Dense(30))#, activation='softmax'))
-#model.add(Activation('relu'))
-
-model.add(Dense(3))#, activation='softmax'))
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-#model.add(BatchNormalization(epsilon=1e-06, mode=2, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
-model.add(Dense(1))#, activation='softmax'))
-model.add(Activation('sigmoid'))
-#model.add(BatchNormalization(epsilon=1e-06, mode=0, axis=-1, momentum=0.9, weights=None, beta_init='zero', gamma_init='one'))
-
-#model.add(Activation('softmax'))
-print model.summary()
-
-
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-print "starting fit"
-
-model.fit(np.asarray(fulldata), np.asarray(groundtruth), nb_epoch=25, batch_size=10)
-
-scores = model.evaluate(np.asarray(fulldata), np.asarray(groundtruth))
-print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-
-"""
+# This part saves the network
 
 model_json = model.to_json()
 with open("convnetwork.json", "w") as json_file:
@@ -312,45 +290,6 @@ with open("convnetwork.json", "w") as json_file:
 #serialize weights to HDF5
 model.save_weights("convnetwork.h5")
 print("Saved model to disk")
-
-
-
-
-
-
-
-
-#prediction = model.predict(data2)
-
-
-
-#f_out=open(fn2,'w')
-#pred_string = ()
-
-#count = 0
-
-#w = csv.writer(open(fn3, "w"))
-#for i in range(len(prediction)):
-
-	
-#	w.writerow([prediction[i][0]])
-
-
-	
-
-
-
-#print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-
-
-#model.add(Convolution3D(nb_filter= 0, input_dim = (11, X, Y)))
-
-#model.add(MaxPooling3D(pool_size=(1, 1, numfeatures)))
-
-
-
-
-
 
 
 
