@@ -42,8 +42,8 @@ else :
 	for fn in os.listdir('.') :
 		file_list.append(fn)
 
-filename = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetworkfix.json'
-filename2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetworkfix.h5'
+filename = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetworkrevdtc.json'
+filename2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetworkrevdtc.h5'
 json_file = open(filename, 'r')
 loaded_model_json = json_file.read()
 json_file.close()
@@ -64,6 +64,7 @@ print("Loaded model from disk")
 data = []
 groundtruth = []
 neighbors = []
+predicts = []
 counter = 0
 if (_platform == "darwin") : 
 	seg_gt_dir = '/Users/18AkhilA/Downloads/ISBI_2016_Part1_Test_GroundTruth'
@@ -123,7 +124,7 @@ for fn in file_list :
 
 
 
-			temp = zip(r, g, b) #dis, corr, con, en, hom)
+			temp = zip(r, g, b, dtc) #dis, corr, con, en, hom)
 
 			data.extend(temp)
 
@@ -184,27 +185,35 @@ for fn in file_list :
 
 				#print tempd
 
-				tempf = np.zeros(( 3, 3, 3))
+				tempf = np.zeros(( 1, 3, 3, 4))
 
 				for j in range(len(tempd)):
 					for z in range(len(tempd[0])):
 						index = int(tempd[j][z])
 						if (index == -1) :
-							tempf[j][z] = [0, 0, 0]
+							tempf[0][j][z] = [0, 0, 0, 1]
 						else :
-							tempf[j][z] = data[index]
+							tempf[0][j][z] = data[index]
 
 				fulldata.append(tempf)
+
 
 			print "predicting"
 
 			fulldata = np.asarray(fulldata)
-			fulldata = fulldata.reshape(fulldata.shape[0], 3, 3, 3)
+			fulldata = fulldata.reshape(fulldata.shape[0], 4, 3, 3)
 
 
 			prediction = model.predict(np.asarray(fulldata))
 
+			prediction = np.asarray(prediction)
+			prediction = prediction.reshape(prediction.shape[0], 1, 3, 3)
+
 			print "done predicting"
+
+			print len(prediction), len(prediction[0]), len(prediction[0][0]), len(prediction[0][0][0])
+
+
 
 			fn2 = fn.replace('.txt', '_Prediction_cnn2.csv')
 
@@ -212,7 +221,7 @@ for fn in file_list :
 			w = csv.writer(open(fn2, "w"))
 			for i in range(len(prediction)):
 
-				w.writerow([prediction[i][0]])
+				w.writerow([prediction[i][0][1][1]])
 
 
 
