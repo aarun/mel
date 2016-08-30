@@ -5,7 +5,7 @@ counter = 1
 counter2 = 0
 batch_str = ('')
 
-f_out=open('batch1.txt', 'w')
+f_out=open('batch.txt', 'w')
 
 for fn in os.listdir('.') :
 	if (fn.endswith('.jpg') and fn[0] != '.') :
