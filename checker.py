@@ -92,12 +92,12 @@ for fn in file_list:
 		accuracy = (tp + tn)/(tp + fp + tn + fn)
 		sensitivity = tp/(tp + fn)
 		specificity = tn/(tn + fp)
-		dice_coeff = (2*tp)/((2*tp) + fn + tp)
+		dice_coeff = (2*tp)/((2*tp) + fn + fp)
 		jaccard_ind = tp/(tp + fn + fp)
 
 		image = Image.fromarray(imarr_overlay)
 		#image.show()
-		image.save(root_name + '_error.jpg')	
+		image.save(root_name + '_error.png')	
 
 		print root_name, ',', accuracy, ',', sensitivity, ',', specificity, ',', dice_coeff, ',', jaccard_ind
 		#print accuracy

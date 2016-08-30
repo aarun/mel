@@ -101,10 +101,11 @@ for fn in file_list :
 
 			#print ground_file.fieldnames
 
+
 			m = []
 
 			for row in ground_file:
-				m.append(int(row[" mask0"]))
+				m.append(int(row[" mask"]))
 
 			groundtruth.extend(m)
 			counter += 1
