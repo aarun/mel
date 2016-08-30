@@ -29,8 +29,8 @@ file_list =[]
 if (args['list'] != None) :
 	with open(args['list']) as batch_file :
 		for line in batch_file :
-			if line.endswith('.txt') :
-				line = line.replace('.txt', '.jpg')			
+			if line.endswith('.jpg\n') :
+				line = line.replace('.jpg', '.txt')		
 			a = line.strip('\n')
 			file_list.append(a)
 else :
