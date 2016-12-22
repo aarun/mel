@@ -37,13 +37,15 @@ if (args['list'] != None) :
 	with open(args['list']) as batch_file :
 		for line in batch_file :
 			a = line.strip('\n')
+			a = a.replace('.jpg', '.txt')
 			file_list.append(a)
 else :
 	for fn in os.listdir('.') :
 		file_list.append(fn)
+print file_list
 
-filename = '/Users/18AkhilA/Downloads/ISBI2016_ISIC_Part1_Training_ch/network.json'
-filename2 = '/Users/18AkhilA/Downloads/ISBI2016_ISIC_Part1_Training_ch/model.h5'
+filename = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/networkrgb.json'
+filename2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/modelrgb.h5'
 json_file = open(filename, 'r')
 loaded_model_json = json_file.read()
 json_file.close()
@@ -65,7 +67,7 @@ data = []
 groundtruth = []
 counter = 0
 if (_platform == "darwin") : 
-	seg_gt_dir = '/Users/18AkhilA/Downloads/ISBI_2016_Part1_Training_GroundTruth'
+	seg_gt_dir = '/Users/18AkhilA/Downloads/ISBI_2016_Part1_Test_GroundTruth'
 else :
 	seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
 
@@ -80,34 +82,9 @@ for fn in file_list :
 			input_file = csv.DictReader(open(fn))
 			#print input_file.fieldnames
 
-			r0 = []
-			r1 = []
-			r2 = []
-			r3 = []
-			r4 = []
-			r5 = []
-			r6 = []
-			r7 = []
-
-			data = []
-
-			g0 = []
-			g1 = []
-			g2 = []
-			g3 = []
-			g4 = []
-			g5 = []
-			g6 = []
-			g7 = []
-
-			b0 = []
-			b1 = []
-			b2 = []
-			b3 = []
-			b4 = []
-			b5 = []
-			b6 = []
-			b7 = []
+			r = []
+			g = []
+			b = []
 
 			dis = []
 			corr = []
@@ -121,34 +98,9 @@ for fn in file_list :
 
 
 			for row in input_file:
-				r0.append(float(row[" R0"]))
-				r1.append(float(row[" R1"]))
-				r2.append(float(row[" R2"]))
-				r3.append(float(row[" R3"]))
-				r4.append(float(row[" R4"]))
-				r5.append(float(row[" R5"]))
-				r6.append(float(row[" R6"]))
-				r7.append(float(row[" R7"]))
-
-
-				g0.append(float(row[" G0"]))
-				g1.append(float(row[" G1"]))
-				g2.append(float(row[" G2"]))
-				g3.append(float(row[" G3"]))
-				g4.append(float(row[" G4"]))
-				g5.append(float(row[" G5"]))
-				g6.append(float(row[" G6"]))
-				g7.append(float(row[" G7"]))
-
-
-				b0.append(float(row[" B0"]))
-				b1.append(float(row[" B1"]))
-				b2.append(float(row[" B2"]))
-				b3.append(float(row[" B3"]))
-				b4.append(float(row[" B4"]))
-				b5.append(float(row[" B5"]))
-				b6.append(float(row[" B6"]))
-				b7.append(float(row[" B7"]))
+				r.append(float(row[" Avg R value"]))
+				g.append(float(row[" Avg G value"]))
+				b.append(float(row[" Avg B value"]))
 
 
 				dis.append(float(row[" Dissimilarity"]))
@@ -157,12 +109,12 @@ for fn in file_list :
 				en.append(float(row[" Energy"]))
 				hom.append(float(row[" Homogeneity"]))
 				
-				dtc.append(float(row[" Distance_center"]))
-				nrow.append(float(row[" Norm_row"]))
-				ncol.append(float(row[" Norm_column"]))
+				dtc.append(float(row[" Distance from center"]))
+				nrow.append(float(row[" Normalized row"]))
+				ncol.append(float(row[" Normalized column"]))
 
 
-			temp = zip(r0,r1,r2,r3,r4,r5,r6,r7, g0,g1,g2,g3,g4,g5,g6,g7, b0,b1,b2,b3,b4,b5,b6,b7, dis, corr, con, en, hom, dtc, nrow, ncol)
+			temp = zip(r,g,b, dis, corr, con, en, hom, dtc, nrow, ncol)
 
 			data.extend(temp)
 

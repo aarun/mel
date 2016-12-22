@@ -77,7 +77,7 @@ for fn in file_list:
 			if (val == prediction[neighbors[0][i][7]]):
 				check+=1
 
-			if(check <= 3):
+			if(check <= 2):
 				if (val == 0):
 					prediction[i] = 1
 				else:

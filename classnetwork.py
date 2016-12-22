@@ -62,9 +62,14 @@ gtc = 0
 groundtruth = []
 counter = 0
 if (_platform == "darwin") : 
-	seg_gt_dir = '/Users/18AkhilA/Downloads/ISBI_2016_Part1_Training_GroundTruth'
+	seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
 else :
 	seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
+
+if (_platform == "darwin") : 
+	gt_fn = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part3_Training_GroundTruth.csv'
+else :
+	gt_fn = 'C:\mel\ISBI2016_ISIC_Part2_Training_GroundTruth.csv'
 
 		
 for fn in file_list :
@@ -103,12 +108,10 @@ for fn in file_list :
 				en.append(float(row[" Energy"]))
 				hom.append(float(row[" Homogeneity"]))
 				
-				dtc.append(float(row[" Distance from center"]))
-				nrow.append(float(row[" Normalized row"]))
-				ncol.append(float(row[" Normalized column"]))
+				
 
 
-			temp = zip(r,g,b, dis, corr, con, en, hom, dtc, nrow, ncol)
+			temp = zip(r,g,b, dis, corr, con, en, hom)
 
 			data.extend(temp)
 
@@ -121,20 +124,49 @@ for fn in file_list :
 
 			ground_file = csv.DictReader(open(long_fn))
 
-			#print ground_file.fieldnames
+			
 
-			keys = ground_file.fieldnames
+			fl = 0
 
-			m = []
+			ground_file2 = csv.DictReader(open(gt_fn))
 
-			for row in ground_file:
-				m.append(int(row[" mask"]))
-				tm = int(row[" mask"])
-				if (tm == 1):
-					gtc+=1
+			#print ground_file2.fieldnames
+			fn3 = fn[:-4]
+
+
+			for row in ground_file2 :
+
+				if (row["File"] == fn3):
+					
+					if (row["Data"] == 'malignant'):
+						fl = 1
+
+			
+
+			if (fl == 1):
+
+				print "here"
+				keys = ground_file.fieldnames
+				#tempory workaround for now. will fix this
+				m = [keys[2]]
+				#print keys
+
+				for row in ground_file:
+					m.append(int(row[" mask0"]))
+					tm = int(row[" mask0"])
+					if (tm == 1):
+						gtc+=1
+
+			else:
+
+				m = []
+				for row in ground_file:
+					m.append(int(0))
+
 
 
 			groundtruth.extend(m)
+
 			counter += 1
 
 groundtruth = np.asarray(groundtruth)
@@ -146,12 +178,17 @@ np.random.shuffle(shuffle)
 data = data[shuffle]
 groundtruth = groundtruth[shuffle]
 
+print gtc, len(groundtruth)
+print groundtruth
+
 scount = 0
 for i in range(len(data)):
 	if (groundtruth[i] == 1):
+		print "here"
 		tdata.append(data[i])
 		tgroundtruth.append(groundtruth[i])
 	elif (scount < gtc):
+		#print "here"
 		tdata.append(data[i])
 		tgroundtruth.append(groundtruth[i])
 		scount+=1
@@ -160,9 +197,9 @@ for i in range(len(data)):
 
 model = Sequential()
 
-model.add(Dense(11, init='uniform', input_dim = 11, activation='relu'))
+model.add(Dense(8, init='uniform', input_dim = 8, activation='relu'))
 
-model.add(Dense(6, init='uniform', activation='relu'))
+model.add(Dense(4, init='uniform', activation='relu'))
 
 model.add(Dense(1, init='uniform', activation='sigmoid'))
 
@@ -179,17 +216,17 @@ tdata = tdata[shuffle]
 tgroundtruth = tgroundtruth[shuffle]
 
 
-model.fit(tdata, tgroundtruth, nb_epoch=20, batch_size=10)
+model.fit(tdata, tgroundtruth, nb_epoch=5, batch_size=10)
 
 scores = model.evaluate(data, groundtruth)
 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 
 model_json = model.to_json()
-with open("networkrgb.json", "w") as json_file:
+with open("networkpart3.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
-model.save_weights("modelrgb.h5")
+model.save_weights("modelpart3.h5")
 print("Saved model to disk")
 
 

@@ -2,6 +2,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers.convolutional import Convolution3D
 from keras.layers.pooling import MaxPooling3D
+#from keras.models import load_model
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 from PIL import Image
@@ -12,11 +13,13 @@ from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
 import csv
 import cPickle
+import pickle
 from sklearn.externals import joblib
 import os
 from sys import platform as _platform
 from keras.models import model_from_json
 import h5py
+from keras.layers import Merge
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-n', '--number', required = False, help = 'number of files')
@@ -42,14 +45,46 @@ else :
 	for fn in os.listdir('.') :
 		file_list.append(fn)
 
-filename = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetwork.json'
-filename2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convnetwork.h5'
+filename = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/leftconvnet.json'
+filename2 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/leftconvnet.h5'
+
+filename3 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/rightconvnet.json'
+filename4 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/rightconvnet.h5'
+
+filename5 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/objs.pickle'
+filename6 = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data/convn.h5'
 json_file = open(filename, 'r')
+loaded_left_json = json_file.read()
+json_file.close()
+
+json_file = open(filename3, 'r')
+loaded_right_json = json_file.read()
+json_file.close()
+
+json_file = open(filename5, 'r')
 loaded_model_json = json_file.read()
 json_file.close()
-model = model_from_json(loaded_model_json)
+
+left = model_from_json(loaded_left_json)
+
+right = model_from_json(loaded_right_json)
+
+#with open(filename5) as f:  # Python 3: open(..., 'rb')
+#    weights = pickle.load(f)
+
+
+model = Sequential()
 # load weights into new model
-model.load_weights(filename2)
+right.load_weights(filename2)
+left.load_weights(filename4)
+
+model.add(Merge([left, right], mode='ave'))
+#model.add(Dense(1, activation='sigmoid'))
+
+#model.layers[1].set_weights(weights)
+
+
+#print(len(model.layers))
 print("Loaded model from disk")
 
 
@@ -196,7 +231,7 @@ for fn in file_list :
 			fulldata = fulldata.reshape(fulldata.shape[0], 3, 3, 3)
 
 
-			prediction = model.predict(np.asarray(fulldata))
+			prediction = model.predict([np.asarray(fulldata), np.asarray(fulldata)])
 
 			print "done predicting"
 

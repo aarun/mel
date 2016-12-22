@@ -16,6 +16,8 @@ with open(args['list']) as batch_file :
 		if line.endswith('.jpg\n') :
 			line = line.replace('.jpg', '.txt')
 		a = line.strip('\n')
+		if a.endswith('\r') :
+			a = a.strip('\r')
 		file_list.append(a)
 
 #print file_list
@@ -36,8 +38,8 @@ for fn in file_list:
 		truepos = 0
 
 		if (_platform == "darwin") : 
-			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Test_GroundTruth'
-			orig_dir = '/Users/sahana/Mel/ISBI2016_ISIC_Part1_Test_Data/'
+			seg_gt_dir = '/users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Test_GroundTruth'
+			orig_dir = '/Users/18AkhilA/Documents/Mel/ISBI2016_ISIC_Part1_Test_Data/'
 			gt_fn = seg_gt_dir + "/" + root_name + '_Segmentation.png'			
 		else :
 			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Test_GroundTruth'
@@ -79,6 +81,9 @@ for fn in file_list:
 						falsepos += 1
 						imarr_overlay[i][j] = [0,255,0]
 
+
+
+
 		#print truepos
 		#print falseneg
 		#print trueneg
@@ -95,9 +100,9 @@ for fn in file_list:
 		dice_coeff = (2*tp)/((2*tp) + fn + fp)
 		jaccard_ind = tp/(tp + fn + fp)
 
-		image = Image.fromarray(imarr_overlay)
+		#image = Image.fromarray(imarr_overlay)
 		#image.show()
-		image.save(root_name + '_error.png')	
+		#image.save(root_name + '_error.png')	
 
 		print root_name, ',', accuracy, ',', sensitivity, ',', specificity, ',', dice_coeff, ',', jaccard_ind
 		#print accuracy

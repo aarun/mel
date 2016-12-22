@@ -11,10 +11,12 @@ import cPickle
 from sklearn.externals import joblib
 import os
 
+from sys import platform as _platform
+
 
 if (_platform == "darwin") : 
 		seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Training_Data'
-	else :
+else :
 		seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_Data'
 
 for fn in os.listdir('.') :

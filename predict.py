@@ -103,7 +103,7 @@ for fn in file_list :
 		w = csv.writer(open(fn2, "w"))
 		for i in range(len(prediction)):
 
-			w.writerow([prediction[i]])
+			w.writerow([prediction[i][0]])
 
 
 

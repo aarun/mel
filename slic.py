@@ -57,12 +57,12 @@ segments = slic(image, n_segments = 3000, sigma = 5, slic_zero = 2)
 fig = plt.figure("Superpixels -- %d segments" % (5000))
 ax = fig.add_subplot(1, 1, 1)
 ax.imshow(mark_boundaries(image, segments))
-#fig.savefig('/Users/18AkhilA/Desktop/superpix.jpg')
+fig.savefig('/Users/18AkhilA/Desktop/superpix.jpg')
 plt.axis("off")
  
 # show the plots
 plt.savefig('superpix.png', bbox_inches='tight')
-#plt.show()
+plt.show()
 
 file = open("supersize.txt", "w")
 counter = 0

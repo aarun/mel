@@ -71,7 +71,7 @@ for fn in file_list:
 		fn2 = fn.replace('.jpg', '_Segmentation.png')
 
 		if (_platform == "darwin") : 
-			seg_gt_dir = '/users/sahana/mel/ISBI2016_ISIC_Part1_Training_GroundTruth'
+			seg_gt_dir = '/Users/18AkhilA/Documents/mel/ISBI2016_ISIC_Part1_Test_GroundTruth'
 			long_fn = seg_gt_dir + "/" + fn2			
 		else :
 			seg_gt_dir = 'C:\mel\ISBI2016_ISIC_Part1_Training_GroundTruth'
@@ -162,7 +162,7 @@ for fn in file_list:
 				   + str(sp_dict[k][10]) + ', ' + str(sp_dict[k][11]) + ', '
 				   	+ str(sp_dict[k][12]) + '\n')
 
-		maskdict_str = ('label, mask' + '\n')
+		maskdict_str = ('label, mask'+ '\n')
 
 		for k in maskdict:
 			maskdict_str += (str(k) + ', ' + str(maskdict[k]) + '\n')

@@ -221,7 +221,24 @@ for fn in file_list :
 			w = csv.writer(open(fn2, "w"))
 			for i in range(len(prediction)):
 
-				w.writerow([prediction[i][0][1][1]])
+				temps = prediction[i][0][1][1]
+				if (i >0):
+					temp2 = prediction[i-1][0][1][1]
+				else:
+					temp2 = prediction[i][0][1][1]
+
+				if (i < len(prediction)-1):
+					temp3 = prediction[i+1][0][1][1]
+				else:
+					temp3 = prediction[i][0][1][1]
+
+				if (temp2 == temp3) :
+					temps = temp3
+
+
+
+
+				w.writerow([temps])
 
 
 
